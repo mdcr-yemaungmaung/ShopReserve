@@ -1,0 +1,6 @@
+{
+  "name": "ShopReserve",
+  "description": "Shop Manager App — manage bookings, tables, floor plan, staff, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
