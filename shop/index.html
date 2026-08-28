@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EzBookNow — Shop Manager App</title>
+  <meta name="description" content="EzBookNow Shop Manager App — manage bookings, tables, floor plan, staff, and analytics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/design-system.css">
+  <link rel="stylesheet" href="./css/layouts.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <style>
+    .app-loading{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--color-bg);}
+    .app-loading .spinner{width:40px;height:40px;border:3px solid var(--color-outline-variant);border-top-color:var(--color-primary);border-radius:50%;animation:spin .8s linear infinite;}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-loading"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Core Infrastructure -->
+  <script src="../shared/theme/theme-engine.js"></script>
+  <script src="../shared/theme/theme-manager.js"></script>
+  <script src="./registry-data.js"></script>
+  <script src="../shared/theme/storage-map.js"></script>
+  <script src="../shared/js/paths.js"></script>
+  <script src="../shared/js/i18n.js"></script>
+  <script src="../shared/js/mock-data.js"></script>
+  <script src="../shared/js/router.js"></script>
+  <script src="../shared/js/components.js"></script>
+
+  <!-- Shop Screens -->
+  <script src="./js/screens/s01-dashboard.js"></script>
+  <script src="./js/screens/s02-ledger.js"></script>
+  <script src="./js/screens/s03a-booking-modal.js"></script>
+  <script src="./js/screens/s03b-new-booking-modal.js"></script>
+  <script src="./js/screens/s04-availability.js"></script>
+  <script src="./js/screens/s05-shop-info.js"></script>
+  <script src="./js/screens/s06-coupons.js"></script>
+  <script src="./js/screens/s07-analytics.js"></script>
+  <script src="./js/screens/s08-staff-tables.js"></script>
+  <script src="./js/screens/s09-manual-booking.js"></script>
+  <script src="./js/screens/s10-security.js"></script>
+  <script src="./js/screens/s11-login.js"></script>
+  <script src="./js/screens/s12-customers.js"></script>
+  <script src="./js/screens/s13-follow-up.js"></script>
+  <script src="./js/screens/s14-viber-broadcast.js"></script>
+  <script src="./js/screens/s15-sns.js"></script>
+  <script src="./js/screens/s16-loyalty.js"></script>
+  <script src="./js/screens/s17-application.js"></script>
+  <script src="./js/screens/s18-billing.js"></script>
+  <script src="./js/screens/s19-reviews.js"></script>
+  <script src="./js/screens/s20-notifications.js"></script>
+  <script src="./js/screens/s21-tables.js"></script>
+  <script src="./js/screens/s22-staff-accounts.js"></script>
+  <script src="../shared/js/screens/appearance.js"></script>
+
+  <!-- Screen Jump (cross-app from root shared) -->
+  <script src="../../shared/devtools/screen-catalog.js"></script>
+  <script src="../../shared/devtools/screen-jump.js"></script>
+
+  <!-- App Bootstrap -->
+  <script src="../shared/js/app.js"></script>
+
+  <script>
+    // Per-app theme init: Shop App uses ezs_theme key.
+    (function () {
+      if (typeof ThemeManager !== 'undefined') {
+        ThemeManager.init({ storageKey: 'ezs_theme', registryUrl: './registry.json', designDir: 'design-systems/' });
+      }
+      if (typeof ScreenJump !== 'undefined' && typeof ScreenCatalog !== 'undefined') {
+        ScreenJump.init({ app: 'shop', variant: 'reserve' });
+      }
+      if (!window.location.hash) window.location.hash = '/shop/login';
+    })();
+  </script>
+</body>
+</html>

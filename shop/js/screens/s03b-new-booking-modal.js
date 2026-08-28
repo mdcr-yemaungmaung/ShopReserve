@@ -1,0 +1,537 @@
+/* ============================================================
+   EzBookNow Screen S-03-B — Quick New Booking Modal Screen
+   Responsive modal dialog for Desktop, Tablet, and Mobile devices
+   ============================================================ */
+
+const ScreenS03B = (() => {
+  let modalElement = null;
+
+  let bookingSource = 'phone';
+  let guestCount = 4;
+  let currentViewYear = 2026;
+  let currentViewMonth = 6; // 0-indexed: 6 = July
+  let selectedIsoDate = '2026-07-20';
+  let selectedTime = '19:00';
+  let selectedSeatTags = [];
+
+  const tableTags = [
+    { code: 'near_tv', name: 'Near TV', name_mm: 'တီဗီ အနီး' },
+    { code: 'window', name: 'Window Seat', name_mm: 'ပြတင်းပေါက်နား' },
+    { code: 'quiet', name: 'Quiet Zone', name_mm: 'တိတ်ဆိတ်သောနေရာ' },
+    { code: 'smoking', name: 'Outdoor / Smoking', name_mm: 'ပြင်ပ/ဆေးလိပ်သောက်ဧရိယာ' }
+  ];
+
+  const timeSlots = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'];
+
+  function getDateStatus(isoDate, lang) {
+    const parts = isoDate.split('-').map(n => parseInt(n, 10));
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    const dayOfWeek = d.getDay();
+    const dayNum = d.getDate();
+
+    if (dayOfWeek === 0) {
+      return { status: 'closed', label: lang === 'mm' ? 'ပိတ်' : 'Closed', dotColor: '#9ca3af', bg: '#f3f4f6', color: '#6b7280' };
+    }
+    if (dayNum === 10 || dayNum === 24) {
+      return { status: 'full', label: lang === 'mm' ? 'အပြည့်' : 'Full', dotColor: '#ef4444', bg: '#fee2e2', color: '#991b1b' };
+    }
+    if (dayOfWeek === 6 || dayNum === 7 || dayNum === 14) {
+      return { status: 'limited', label: lang === 'mm' ? 'အကန့်အသတ်' : 'Limited', dotColor: '#D8902F', bg: '#fbead1', color: '#854d0e' };
+    }
+    return { status: 'available', label: lang === 'mm' ? 'ဖွင့်' : 'Available', dotColor: '#0F4C5C', bg: '#d0e6ec', color: '#0F4C5C' };
+  }
+
+  function getFullDisplay(isoDate, lang) {
+    const parts = isoDate.split('-').map(n => parseInt(n, 10));
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    const weekdayNames = lang === 'mm'
+      ? ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = lang === 'mm'
+      ? ['ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်', 'ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ']
+      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    const dayLabel = weekdayNames[d.getDay()];
+    const monthLabel = monthNames[d.getMonth()];
+    const dayNum = String(d.getDate()).padStart(2, '0');
+
+    return lang === 'mm'
+      ? `${dayLabel}၊ ${monthLabel} ${dayNum}`
+      : `${dayLabel}, ${monthLabel} ${dayNum}`;
+  }
+
+  function renderMonthCalendarHtml() {
+    const lang = I18n.getLang();
+    const monthNames = lang === 'mm'
+      ? ['ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ', 'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်']
+      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    const actualMonthIndex = currentViewMonth;
+    const monthTitle = `${monthNames[actualMonthIndex]} ${currentViewYear}`;
+
+    const firstDayOfWeek = new Date(currentViewYear, currentViewMonth, 1).getDay();
+    const totalDaysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate();
+
+    let gridCellsHtml = '';
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      gridCellsHtml += `<div style="height: 42px;"></div>`;
+    }
+
+    const todayStr = '2026-07-20';
+
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+      const isoDate = `${currentViewYear}-${String(currentViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const status = getDateStatus(isoDate, lang);
+      const isSelected = isoDate === selectedIsoDate;
+      const isPast = isoDate < todayStr;
+
+      if (isPast) {
+        gridCellsHtml += `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 42px; opacity: 0.35; pointer-events: none;">
+            <span style="font-size: 13px; font-weight: 500; color: #9ca3af;">${day}</span>
+          </div>
+        `;
+      } else {
+        gridCellsHtml += `
+          <div onclick="ScreenS03B.setSelectedDate('${isoDate}')" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 42px; cursor: pointer; user-select: none;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: ${isSelected ? '#0F4C5C' : 'transparent'}; color: ${isSelected ? '#ffffff' : (status.status === 'closed' ? '#9ca3af' : '#1F2937')}; font-weight: ${isSelected ? '700' : '600'}; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; ${isSelected ? 'box-shadow: 0 2px 8px rgba(15, 76, 92, 0.4);' : ''}">
+              ${day}
+            </div>
+            <span style="width: 5px; height: 5px; border-radius: 50%; background: ${status.dotColor}; margin-top: 2px; display: inline-block;"></span>
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div style="background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%); border: 1px solid rgba(15, 76, 92, 0.14); border-radius: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(15, 76, 92, 0.03);">
+        
+        <!-- Month Navigation Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+          <button type="button" onclick="ScreenS03B.changeMonth(-1)" style="border: 1px solid rgba(15, 76, 92, 0.12); background: #f4f8fa; cursor: pointer; font-size: 14px; color: #0F4C5C; font-weight: 700; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+            ‹
+          </button>
+          <span style="font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: #0F4C5C;" id="s03b-month-title">
+            ${monthTitle}
+          </span>
+          <button type="button" onclick="ScreenS03B.changeMonth(1)" style="border: 1px solid rgba(15, 76, 92, 0.12); background: #f4f8fa; cursor: pointer; font-size: 14px; color: #0F4C5C; font-weight: 700; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+            ›
+          </button>
+        </div>
+
+        <!-- 7 Column Weekday Header -->
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; font-weight: 600; color: #46464f; margin-bottom: 6px;">
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+        </div>
+
+        <!-- Days Grid -->
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; text-align: center;" id="s03b-days-grid">
+          ${gridCellsHtml}
+        </div>
+
+        <!-- Status Legend -->
+        <div style="display: flex; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f1f2; font-size: 11px; font-weight: 500; color: #46464f; justify-content: center; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #0F4C5C; display: inline-block;"></span>
+            <span>${lang === 'mm' ? 'ဖွင့်' : 'Available'}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #D8902F; display: inline-block;"></span>
+            <span>${lang === 'mm' ? 'အကန့်အသတ်' : 'Limited'}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+            <span>${lang === 'mm' ? 'အပြည့်' : 'Full'}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; display: inline-block;"></span>
+            <span>${lang === 'mm' ? 'ပိတ်' : 'Closed'}</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  function render() {
+    window.location.hash = '/shop/ledger';
+    setTimeout(() => {
+      open(() => {
+        if (typeof ScreenS02 !== 'undefined') {
+          ScreenS02.render();
+        }
+      });
+    }, 50);
+  }
+
+  function open(onSuccess) {
+    close();
+
+    const lang = I18n.getLang();
+    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
+    const activeStatus = getDateStatus(selectedIsoDate, lang);
+
+    modalElement = document.createElement('div');
+    modalElement.id = 's03b-new-booking-modal';
+    modalElement.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 9999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+    `;
+
+    modalElement.innerHTML = `
+      <div id="s03b-screen" style="width:100%; max-width:680px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg, #fbfcfe 0%, #f0f4f7 100%); border:1px solid rgba(15,76,92,0.14); border-radius:20px; box-shadow:0 10px 40px rgba(15,76,92,0.15); padding:20px; display:flex; flex-direction:column; gap:16px;" onclick="event.stopPropagation()">
+      <form id="s03b-form" style="display:flex; flex-direction:column; gap:16px;" onsubmit="return false;">
+        
+        <!-- Modal Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(15,76,92,0.1); padding-bottom:12px;">
+          <div>
+            <h3 style="font-family:'Outfit',sans-serif; font-size:22px; font-weight:700; color:#0F4C5C; margin:0;">
+              📖 ${lang === 'mm' ? 'ဘွတ်ကင် အသစ် စာရင်းသွင်းရန်' : 'Manual Booking'}
+            </h3>
+            <p style="font-size:13px; color:#46464f; margin:2px 0 0 0;">
+              ${lang === 'mm' ? 'ဖုန်း သို့မဟုတ် လူကိုယ်တိုင် လာရောက်သော ဧည့်သည်များအတွက် ဘွတ်ကင်အသစ် စာရင်းသွင်းရန်' : 'Create a new reservation for a walk-in or phone customer.'}
+            </p>
+          </div>
+          <button type="button" style="border:none; background:none; font-size:22px; cursor:pointer; color:#777680;" onclick="ScreenS03B.close()">✕</button>
+        </div>
+
+        <!-- Responsive Layout Grid inside Modal -->
+        <div class="stitch-layout-grid">
+          
+          <!-- Left Column -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- BOOKING SOURCE Card -->
+            <div class="stitch-card" style="margin-bottom:0;">
+              <span class="stitch-label">${lang === 'mm' ? 'ဘွတ်ကင် အရင်းအမြစ်' : 'BOOKING SOURCE'}</span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button type="button" id="s03b-btn-phone" onclick="ScreenS03B.setSource('phone')" class="${bookingSource === 'phone' ? 'stitch-btn-active' : 'stitch-btn-inactive'}" style="height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px; cursor: pointer; transition: all 0.2s;">
+                  <span class="material-symbols-outlined" style="font-size: 18px;">call</span>
+                  ${lang === 'mm' ? 'ဖုန်းဖြင့် ဘွတ်ကင်' : 'Phone'}
+                </button>
+                <button type="button" id="s03b-btn-walkin" onclick="ScreenS03B.setSource('walkin')" class="${bookingSource === 'walkin' ? 'stitch-btn-active' : 'stitch-btn-inactive'}" style="height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13.5px; cursor: pointer; transition: all 0.2s;">
+                  <span class="material-symbols-outlined" style="font-size: 18px;">directions_walk</span>
+                  ${lang === 'mm' ? 'လူကိုယ်တိုင်' : 'Walk-in'}
+                </button>
+              </div>
+            </div>
+
+            <!-- CUSTOMER INFORMATION Card -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 10px; margin-bottom:0;">
+              <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'ဧည့်သည် အချက်အလက်' : 'CUSTOMER INFORMATION'}</span>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 12px; font-weight: 500; color: #46464f;">${I18n.t('customer_name')} <span class="text-error">*</span></label>
+                <input type="text" id="new-book-name" placeholder="${lang === 'mm' ? 'ဥပမာ - ဦးမောင်မောင်' : 'e.g. John Doe'}" style="width: 100%; height: 42px; border: 1px solid #c7c5d0; border-radius: 10px; padding: 0 14px; font-size: 14px; color: #1F2937; background: #f4f8fa; outline: none;" required />
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 12px; font-weight: 500; color: #46464f;">${I18n.t('contact_phone')} <span class="text-error">*</span></label>
+                ${Components.phoneInput({ id: 'new-book-phone', required: true })}
+              </div>
+            </div>
+
+            <!-- SCHEDULE Card -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 10px; margin-bottom:0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'ရက်စွဲ နှင့် အချိန်' : 'SCHEDULE'}</span>
+                <span style="color: #0F4C5C; font-weight: 700; font-size: 12px;" id="s03b-selected-date-display">${activeDateDisplay} • ${activeStatus.label}</span>
+              </div>
+
+              <!-- Monthly Grid Calendar Picker -->
+              <div id="s03b-calendar-wrapper">
+                ${renderMonthCalendarHtml()}
+              </div>
+
+              <!-- Time Slots Grid -->
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px;" id="s03b-time-container">
+                ${timeSlots.map(t => `
+                  <button type="button" data-time="${t}" onclick="ScreenS03B.setTimeSlot('${t}')" class="stitch-time-slot ${t === selectedTime ? 'active' : 'inactive'}" style="height: 38px; font-size: 12.5px;">
+                    ${t}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <!-- TOTAL GUESTS Card -->
+            <div class="stitch-card" style="display: flex; align-items: center; justify-content: space-between; margin-bottom:0;">
+              <div>
+                <span class="stitch-label" style="margin-bottom: 2px;">${lang === 'mm' ? 'ဧည့်သည် ဦးရေ' : 'TOTAL GUESTS'}</span>
+                <span style="font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; color: #0F4C5C;" id="s03b-guest-count">${guestCount}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <button type="button" class="stitch-stepper-btn" style="width:36px; height:36px;" onclick="ScreenS03B.adjustGuests(-1)">
+                  <span class="material-symbols-outlined" style="font-size: 18px;">remove</span>
+                </button>
+                <button type="button" class="stitch-stepper-btn" style="width:36px; height:36px;" onclick="ScreenS03B.adjustGuests(1)">
+                  <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Table & Seating Preference -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 10px; margin-bottom:0;">
+              <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'စားပွဲ နှင့် တောင်းဆိုချက် Tags' : 'SEATING & TABLE PREFERENCE'}</span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="s03b-tags-container">
+                ${tableTags.map(tag => {
+                  const isSelected = selectedSeatTags.includes(tag.code);
+                  const tagLabel = lang === 'mm' ? tag.name_mm : tag.name;
+                  return `
+                    <button type="button" data-tag-code="${tag.code}" onclick="ScreenS03B.togglePreferredTag('${tag.code}')" style="padding: 6px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 600; border: 1.5px solid ${isSelected ? '#0B1220' : '#CBD5E1'}; background: ${isSelected ? '#0B1220' : '#FFFFFF'}; color: ${isSelected ? '#FFFFFF' : '#334155'}; cursor: pointer; transition: all 0.15s;">
+                      ${tagLabel}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                <label style="font-size: 12px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
+                <select id="new-book-table" onchange="ScreenS03B.updateSummary()" style="width: 100%; height: 40px; border: 1px solid #c7c5d0; border-radius: 10px; padding: 0 12px; font-size: 13px; color: #0F4C5C; font-weight: 600; background: #f4f8fa;">
+                  <option value="">${lang === 'mm' ? 'စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (Auto Assign)' : 'Auto Assign'}</option>
+                  ${(MockData.tables || []).map(t => `<option value="${t.name}">${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('')}
+                </select>
+              </div>
+            </div>
+
+            <!-- SPECIAL REQUESTS / NOTES Card -->
+            <div class="stitch-card" style="margin-bottom:0;">
+              <span class="stitch-label">${lang === 'mm' ? 'အထူး တောင်းဆိုချက်များ / မှတ်ချက်' : 'SPECIAL REQUESTS / NOTES'}</span>
+              <textarea id="new-book-notes" placeholder="${lang === 'mm' ? 'ဓာတ်မတည့်သည့်အစားအစာများ၊ ကလေးထိုင်ခုံ စသည်...' : 'Allergies, high chair, window seat...'}" style="width: 100%; min-height: 64px; border: 1px solid #c7c5d0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #1F2937; background: #f4f8fa; resize: none; outline: none;"></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Summary & Submit -->
+        <div style="border-top: 1px solid rgba(15,76,92,0.1); padding-top: 14px; margin-top: 4px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #777680;">${lang === 'mm' ? 'ဘွတ်ကင် အနှစ်ချုပ်' : 'Booking Summary'}</span>
+              <span style="font-size: 13.5px; color: #0F4C5C; font-weight: 700;" id="s03b-summary-text">${activeDateDisplay} • ${selectedTime} • ${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" id="s03b-btn-cancel" onclick="ScreenS03B.close()" style="height: 44px; padding: 0 18px; background: #edeeef; color: #0F4C5C; font-size: 13.5px; font-weight: 600; border-radius: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; box-sizing: border-box;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                <span>${lang === 'mm' ? 'မလုပ်တော့ပါ' : 'Cancel'}</span>
+              </button>
+              <button type="submit" id="s03b-btn-submit" class="stitch-register-btn" style="height: 44px; width: auto; padding: 0 20px; font-size: 13.5px; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0; box-sizing: border-box;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+                <span>${lang === 'mm' ? 'ဘွတ်ကင် စာရင်းသွင်းမည်' : 'Register Booking'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+      </div>
+    `;
+
+    modalElement.onclick = () => close();
+    document.body.appendChild(modalElement);
+
+    const form = document.getElementById('s03b-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        submitNewBooking(e, onSuccess);
+      });
+    }
+  }
+
+  function close() {
+    if (modalElement) {
+      modalElement.remove();
+      modalElement = null;
+    }
+  }
+
+  function setSource(type) {
+    bookingSource = type;
+    const btnPhone = document.getElementById('s03b-btn-phone');
+    const btnWalkin = document.getElementById('s03b-btn-walkin');
+
+    if (btnPhone && btnWalkin) {
+      if (type === 'phone') {
+        btnPhone.className = 'stitch-btn-active';
+        btnWalkin.className = 'stitch-btn-inactive';
+      } else {
+        btnWalkin.className = 'stitch-btn-active';
+        btnPhone.className = 'stitch-btn-inactive';
+      }
+    }
+  }
+
+  function changeMonth(delta) {
+    currentViewMonth += delta;
+    if (currentViewMonth < 0) {
+      currentViewMonth = 11;
+      currentViewYear -= 1;
+    } else if (currentViewMonth > 11) {
+      currentViewMonth = 0;
+      currentViewYear += 1;
+    }
+
+    const wrapper = document.getElementById('s03b-calendar-wrapper');
+    if (wrapper) {
+      wrapper.innerHTML = renderMonthCalendarHtml();
+    }
+  }
+
+  function setSelectedDate(isoDate) {
+    selectedIsoDate = isoDate;
+    const lang = I18n.getLang();
+    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
+    const activeStatus = getDateStatus(selectedIsoDate, lang);
+
+    const wrapper = document.getElementById('s03b-calendar-wrapper');
+    if (wrapper) {
+      wrapper.innerHTML = renderMonthCalendarHtml();
+    }
+
+    const dateDisplay = document.getElementById('s03b-selected-date-display');
+    if (dateDisplay) {
+      dateDisplay.innerText = `${activeDateDisplay} • ${activeStatus.label}`;
+    }
+
+    updateSummary();
+  }
+
+  function setTimeSlot(time) {
+    selectedTime = time;
+    const timeContainer = document.getElementById('s03b-time-container');
+    if (timeContainer) {
+      const timeButtons = timeContainer.querySelectorAll('button[data-time]');
+      timeButtons.forEach(btn => {
+        const btnTime = btn.getAttribute('data-time');
+        if (btnTime === selectedTime) {
+          btn.className = 'stitch-time-slot active';
+        } else {
+          btn.className = 'stitch-time-slot inactive';
+        }
+      });
+    }
+
+    updateSummary();
+  }
+
+  function adjustGuests(val) {
+    guestCount = Math.max(1, Math.min(20, guestCount + val));
+    const el = document.getElementById('s03b-guest-count');
+    if (el) el.innerText = guestCount;
+    updateSummary();
+  }
+
+  function togglePreferredTag(tagCode) {
+    const idx = selectedSeatTags.indexOf(tagCode);
+    if (idx === -1) {
+      selectedSeatTags.push(tagCode);
+    } else {
+      selectedSeatTags.splice(idx, 1);
+    }
+    
+    const tagsContainer = document.getElementById('s03b-tags-container');
+    if (tagsContainer) {
+      const tagButtons = tagsContainer.querySelectorAll('button[data-tag-code]');
+      tagButtons.forEach(btn => {
+        const code = btn.getAttribute('data-tag-code');
+        const isSelected = selectedSeatTags.includes(code);
+        btn.style.border = `1.5px solid ${isSelected ? '#0B1220' : '#CBD5E1'}`;
+        btn.style.background = isSelected ? '#0B1220' : '#FFFFFF';
+        btn.style.color = isSelected ? '#FFFFFF' : '#334155';
+      });
+    }
+  }
+
+  function updateSummary() {
+    const lang = I18n.getLang();
+    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
+    
+    const summaryTextEl = document.getElementById('s03b-summary-text');
+    if (summaryTextEl) {
+      summaryTextEl.innerText = `${activeDateDisplay} • ${selectedTime} • ${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
+    }
+  }
+
+  function submitNewBooking(e, onSuccess) {
+    e.preventDefault();
+    const name = document.getElementById('new-book-name').value.trim();
+    
+    if (!Components.validatePhoneNumber('new-book-phone')) {
+      showToast('error', 'Validation Error', I18n.getLang() === 'mm' 
+        ? 'ကျေးဇူးပြု၍ တရားဝင် မြန်မာဖုန်းနံပါတ် ၇ လုံးမှ ၉ လုံး ထည့်သွင်းပါ (ဥပမာ - ၉၄၅၀၀၀၀၀၀၀)' 
+        : 'Please enter a valid Myanmar phone number (e.g., 9450000000).');
+      return;
+    }
+    const phone = Components.getRawPhoneNumber('new-book-phone');
+    const date = selectedIsoDate;
+    const time = selectedTime;
+    const guests = guestCount;
+    const table = document.getElementById('new-book-table').value;
+    const notes = document.getElementById('new-book-notes').value.trim();
+
+    if (!name || !phone) {
+      showToast('error', 'Validation Error', 'Please fill all required inputs.');
+      return;
+    }
+
+    const isOffline = localStorage.getItem('s09_offline') === 'true';
+
+    const newRes = {
+      id: `SR-ENT-${date.replace(/-/g, '')}-${String(Math.floor(100 + Math.random() * 900)).padStart(3, '0')}`,
+      name,
+      phone,
+      date,
+      time,
+      guests,
+      table: table || 'Table 12',
+      notes,
+      preferred_seat_tags: [...selectedSeatTags],
+      status: isOffline ? 'pending_sync' : 'confirmed',
+      source: bookingSource,
+      user_id: null,
+      submittedAt: new Date().toISOString()
+    };
+
+    if (isOffline) {
+      const queue = JSON.parse(localStorage.getItem('pending_bookings') || '[]');
+      queue.unshift(newRes);
+      localStorage.setItem('pending_bookings', JSON.stringify(queue));
+      showToast('info', 'Offline Queued', 'Booking cached locally. Will sync when online.');
+    } else {
+      MockData.shopReservations.unshift(newRes);
+      showToast('success', 'Booking Confirmed', `New booking ${newRes.id} added successfully.`);
+    }
+
+    if (onSuccess) onSuccess();
+    close();
+  }
+
+  return { 
+    render, 
+    open, 
+    close,
+    setSource,
+    changeMonth,
+    setSelectedDate,
+    setTimeSlot,
+    adjustGuests,
+    togglePreferredTag,
+    updateSummary
+  };
+})();
+
