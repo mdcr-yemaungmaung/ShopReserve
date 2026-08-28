@@ -91,9 +91,9 @@ const ScreenS22 = (() => {
 
     const subNavTabs = `
       <div class="flex gap-2 mb-4 p-1 bg-surface-container-low" style="border-radius:var(--radius-md);border:1px solid var(--color-outline-variant);width:fit-content;">
-        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/staff-tables')">👥 ${lang === 'mm' ? 'S-08 ဝန်ထမ်း' : 'S-08 Staff Members'}</button>
-        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/tables')">🪑 ${lang === 'mm' ? 'S-21 စားပွဲ' : 'S-21 Seat & Tables'}</button>
-        <button class="btn btn-primary btn-sm" onclick="Router.navigate('/shop/staff-accounts')">🔐 ${lang === 'mm' ? 'S-22 စတက်ဖ်အကောင့်' : 'S-22 Staff Accounts'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/staff-tables')">👥 ${lang === 'mm' ? 'ဝန်ထမ်း' : 'Staff Members'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/tables')">🪑 ${lang === 'mm' ? 'စားပွဲ' : 'Seat & Tables'}</button>
+        <button class="btn btn-primary btn-sm" onclick="Router.navigate('/shop/staff-accounts')">🔐 ${lang === 'mm' ? 'စတက်ဖ်အကောင့်' : 'Staff Accounts'}</button>
       </div>`;
 
     const content = `

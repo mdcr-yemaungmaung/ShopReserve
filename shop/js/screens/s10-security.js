@@ -68,7 +68,7 @@ const ScreenS10 = (() => {
               <span>/</span>
               <span>Account Management</span>
               <span>/</span>
-              <span style="color:#D8902F; font-weight:700;">Security Settings (S-10)</span>
+              <span style="color:#D8902F; font-weight:700;">Security Settings</span>
             </div>
 
             <h1 style="font-size:24px; font-weight:700; font-family:'Outfit',sans-serif; margin:0 0 8px 0; color:#ffffff; display:flex; align-items:center; gap:12px;">
@@ -78,9 +78,6 @@ const ScreenS10 = (() => {
 
             <!-- System Spec Tags (Pill-shaped 9999px) -->
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span style="background:rgba(255,255,255,0.15); color:#ffffff; border:1px solid rgba(255,255,255,0.3); font-size:11px; font-weight:700; font-family:'Inter',sans-serif; padding:4px 12px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.04em;">
-                Pkg1 Core Base
-              </span>
               <span style="background:rgba(216,144,47,0.2); color:#D8902F; border:1px solid #D8902F; font-size:11px; font-weight:700; font-family:'Inter',sans-serif; padding:4px 12px; border-radius:9999px;">
                 Function ID: C-01
               </span>

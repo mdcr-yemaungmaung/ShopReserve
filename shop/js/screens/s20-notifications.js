@@ -228,8 +228,8 @@ const ScreenS20 = (() => {
         </div>
         <div style="color:var(--color-outline);">
           ${lang === 'mm'
-            ? 'ဤ S-20 မျက်နှာပြင်သည် မူလ 画面設計書 (Design Specification Document) တွင် မပါဝင်ဘဲ Package 2/3 အတွက် ထပ်ဆောင်း တည်ဆောက်ထားသော မျက်နှာပြင်ဖြစ်သည်။ Production တွင် <code>reservation_notifications</code> table (shop_id + channel=in_app) မှ Supabase Realtime subscription ဖြင့် data ရယူမည်ဖြစ်ပြီး Cursor-based pagination (?limit=20&cursor=xxx) ကို အသုံးပြုမည်ဖြစ်သည်။'
-            : 'This S-20 screen is NOT in the original 画面設計書 design specification. It is an ADDITIONAL screen designed for Package 2/3. In production, real-time data will be subscribed from the <code>reservation_notifications</code> table (shop_id + channel=\'in_app\') via Supabase Realtime. Pagination uses cursor-based (?limit=20&cursor=xxx) infinite scroll.'
+            ? 'ဤမျက်နှာပြင်သည် မူလ 画面設計書 (Design Specification Document) တွင် မပါဝင်ဘဲ ထပ်ဆောင်း တည်ဆောက်ထားသော မျက်နှာပြင်ဖြစ်သည်။ Production တွင် <code>reservation_notifications</code> table (shop_id + channel=in_app) မှ Supabase Realtime subscription ဖြင့် data ရယူမည်ဖြစ်ပြီး Cursor-based pagination (?limit=20&cursor=xxx) ကို အသုံးပြုမည်ဖြစ်သည်။'
+            : 'This screen is NOT in the original 画面設計書 design specification. It is an ADDITIONAL screen. In production, real-time data will be subscribed from the <code>reservation_notifications</code> table (shop_id + channel=\'in_app\') via Supabase Realtime. Pagination uses cursor-based (?limit=20&cursor=xxx) infinite scroll.'
           }
         </div>
       </div>

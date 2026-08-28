@@ -387,7 +387,7 @@ const ScreenS03A = (() => {
       <div id="s03a-modal-shell" class="card glass-card" style="width:100%; max-width:560px; max-height:90vh; overflow-y:auto; border-radius:20px; position:relative; box-shadow:var(--shadow-xl); background:linear-gradient(180deg, #fbfcfe 0%, #f3f7fa 100%); border:1px solid rgba(15,76,92,0.14); padding:20px;">
         <div class="flex justify-between items-center mb-4" style="border-bottom:1px solid rgba(15,76,92,0.1); padding-bottom:12px;">
           <h3 style="font-weight:700; color:var(--color-primary); font-size:18px; margin:0; font-family:'Outfit',sans-serif;">
-            📖 ${I18n.t('booking_ledger')} — S-03-A ${isEditing ? 'Edit' : 'Details'}
+            📖 ${I18n.t('booking_ledger')} ${isEditing ? 'Edit' : 'Details'}
           </h3>
           <button type="button" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--color-outline);" onclick="ScreenS03A.close()">✕</button>
         </div>

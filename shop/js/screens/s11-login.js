@@ -198,14 +198,8 @@ const ScreenS11 = (() => {
         
         <!-- Header Spec Pill Badges -->
         <div style="display:flex; justify-content:center; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
-          <span style="background:#e0e7ff; color:#3730a3; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px; text-transform:uppercase;">
-            Pkg1 Core System
-          </span>
           <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px;">
             Function ID: C-01
-          </span>
-          <span style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px;">
-            Screen S-11
           </span>
         </div>
 

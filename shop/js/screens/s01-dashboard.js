@@ -87,7 +87,7 @@ const ScreenS01 = (() => {
                 <strong>Operations Contact:</strong> support@ezbooknow.com / 09-770001111
               </div>
               <div style="font-size:12px; background:rgba(186, 26, 26, 0.1); border-radius:6px; padding:6px 12px; color:var(--color-error, #ba1a1a); font-weight:600;">
-                ℹ️ Existing reservations (S-02 / S-03) can be processed normally. Modifications to shop settings (S-04, S-05, S-08, S-21, S-22) and new incoming reservations are disabled during suspension.
+                ℹ️ Existing reservations can be processed normally. Modifications to shop settings and new incoming reservations are disabled during suspension.
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ const ScreenS01 = (() => {
             <div>
               <strong style="color:var(--color-on-surface); font-size:14px;">Shop Closed (Closure Processing in Progress)</strong>
               <div style="font-size:12.5px; color:var(--color-outline); margin-top:2px;">
-                Only S-02 (Booking Ledger) remains accessible to process remaining customer reservations.
+                Only the Booking Ledger remains accessible to process remaining customer reservations.
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@ const ScreenS01 = (() => {
                 Onboarding verification failed due to missing or expired business credentials. Please review information and resubmit.
               </div>
               <div style="margin-top:8px;">
-                <button class="btn btn-sm btn-primary" onclick="Router.navigate('/shop/application')">Review Application & Resubmit (S-17)</button>
+                <button class="btn btn-sm btn-primary" onclick="Router.navigate('/shop/application')">Review Application & Resubmit</button>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ const ScreenS01 = (() => {
       <div class="flex items-center justify-between flex-wrap gap-3 mb-6" style="background:#FFFFFF; padding:10px 16px; border-radius:var(--radius-md, 8px); border:1px solid #E2E8F0;">
         <div class="flex items-center gap-4 flex-wrap">
           <!-- Sync Queue / Conflict Badge -> S-02 -->
-          <div onclick="Router.navigate('/shop/ledger')" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:12.5px; font-weight:600; color:${syncConflictCount > 0 ? 'var(--color-error)' : 'var(--color-on-surface)'};" title="View Booking Ledger (S-02)">
+          <div onclick="Router.navigate('/shop/ledger')" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:12.5px; font-weight:600; color:${syncConflictCount > 0 ? 'var(--color-error)' : 'var(--color-on-surface)'};" title="View Booking Ledger">
             <span>🔄</span>
             <span>Sync Queue / Conflicts</span>
             ${syncConflictCount > 0 ? `
@@ -197,19 +197,19 @@ const ScreenS01 = (() => {
           </p>
           <div class="grid grid-2 gap-3" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));">
             <div class="p-3 bg-surface-container flex items-center justify-between" style="border-radius:6px; cursor:pointer;" onclick="Router.navigate('/shop/availability')">
-              <div style="font-size:12px; font-weight:600;">⏰ 1. Business Hours & Slots (S-04)</div>
+              <div style="font-size:12px; font-weight:600;">⏰ 1. Business Hours & Slots</div>
               <span style="color:#2563EB;">→</span>
             </div>
             <div class="p-3 bg-surface-container flex items-center justify-between" style="border-radius:6px; cursor:pointer;" onclick="Router.navigate('/shop/shop-info')">
-              <div style="font-size:12px; font-weight:600;">🏬 2. Shop Info & Menu Items (S-05)</div>
+              <div style="font-size:12px; font-weight:600;">🏬 2. Shop Info & Menu Items</div>
               <span style="color:#2563EB;">→</span>
             </div>
             <div class="p-3 bg-surface-container flex items-center justify-between" style="border-radius:6px; cursor:pointer;" onclick="Router.navigate('/shop/staff-tables')">
-              <div style="font-size:12px; font-weight:600;">👥 3. Staff Roster (S-08)</div>
+              <div style="font-size:12px; font-weight:600;">👥 3. Staff Roster</div>
               <span style="color:#2563EB;">→</span>
             </div>
             <div class="p-3 bg-surface-container flex items-center justify-between" style="border-radius:6px; cursor:pointer;" onclick="Router.navigate('/shop/tables')">
-              <div style="font-size:12px; font-weight:600;">🪑 4. Tables & Floor Plan (S-21)</div>
+              <div style="font-size:12px; font-weight:600;">🪑 4. Tables & Floor Plan</div>
               <span style="color:#2563EB;">→</span>
             </div>
           </div>

@@ -40,7 +40,7 @@ const ScreenS21 = (() => {
     // Role Limit Warning Banner if shop_staff
     const warningBanner = !isOwner ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md); font-weight:600; font-size:13px; border: 1px solid var(--color-error);">
-        🚫 ${lang === 'mm' ? 'ဝင်ရောက်ခွင့် မရှိပါ: S-21 စားပွဲစီမံခန့်ခွဲမှုကို ဆိုင်ပိုင်ရှင် (Shop Owner) တစ်ဦးတည်းသာ ဝင်ရောက်ပြင်ဆင်ခွင့် ရှိပါသည်။ (Role Limit: C-07)' : 'Access Restricted: Only the Shop Owner (shop_owner) has permission to modify table master data (C-07).'}
+        🚫 ${lang === 'mm' ? 'ဝင်ရောက်ခွင့် မရှိပါ: စားပွဲစီမံခန့်ခွဲမှုကို ဆိုင်ပိုင်ရှင် (Shop Owner) တစ်ဦးတည်းသာ ဝင်ရောက်ပြင်ဆင်ခွင့် ရှိပါသည်။ (Role Limit: C-07)' : 'Access Restricted: Only the Shop Owner (shop_owner) has permission to modify table master data (C-07).'}
       </div>
     ` : '';
 
@@ -162,8 +162,8 @@ const ScreenS21 = (() => {
       </div>
     `;
 
-    App.renderAdminPage('shop', lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု (S-21)' : 'Table Management (S-21)', `
-      ${Components.pageHeader(lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု (S-21)' : 'Table Management (S-21)', lang === 'mm' ? 'shop_tables ခုံခွဲများနှင့် seat_attribute Tag များ စီမံရန် (C-07)' : 'Manage table master data and seat attribute tags (shop_tables / C-07).')}
+    App.renderAdminPage('shop', lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု' : 'Table Management', `
+      ${Components.pageHeader(lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု' : 'Table Management', lang === 'mm' ? 'shop_tables ခုံခွဲများနှင့် seat_attribute Tag များ စီမံရန် (C-07)' : 'Manage table master data and seat attribute tags (shop_tables / C-07).')}
       ${warningBanner}
       ${content}
     `);

@@ -512,10 +512,10 @@ const MockData = (() => {
     },
     {
       id: 'sn-13', type: 'feature_update',
-      title: 'New Feature: S-20 Notification Center',
-      title_mm: 'လုပ်ဆောင်ချက်အသစ်: S-20 အကြောင်းကြားစာ ဗဟိုဌာန',
-      body: 'The Shop Notification Center (S-20) is now available in your dashboard. Manage all booking, billing, and review alerts in one place.',
-      body_mm: 'ဆိုင် အကြောင်းကြားစာ ဗဟိုဌာန (S-20) ကို dashboard မှ ဝင်ရောက်နိုင်ပြီ။ ဘွတ်ကင်၊ ငွေကြေးနှင့် သုံးသပ်ချက် အကြောင်းကြားချက်များ တစ်နေရာတည်းမှ စီမံပါ',
+      title: 'New Feature: Notification Center',
+      title_mm: 'လုပ်ဆောင်ချက်အသစ်: အကြောင်းကြားစာ ဗဟိုဌာန',
+      body: 'The Shop Notification Center is now available in your dashboard. Manage all booking, billing, and review alerts in one place.',
+      body_mm: 'ဆိုင် အကြောင်းကြားစာ ဗဟိုဌာန ကို dashboard မှ ဝင်ရောက်နိုင်ပြီ။ ဘွတ်ကင်၊ ငွေကြေးနှင့် သုံးသပ်ချက် အကြောင်းကြားချက်များ တစ်နေရာတည်းမှ စီမံပါ',
       readAt: null, createdAt: '2026-07-17T07:00:00',
       meta: {}
     },

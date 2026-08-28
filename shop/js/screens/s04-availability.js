@@ -278,7 +278,7 @@ const ScreenS04 = (() => {
               </div>
               <span style="font-size:12px; color:var(--color-outline);">Guests</span>
             </div>
-            <span class="form-hint" style="font-size:10.5px;">Initial value calculated from table sum in <a href="#/shop/tables" style="color:var(--color-primary); text-decoration:underline;">S-21</a>.</span>
+            <span class="form-hint" style="font-size:10.5px;">Initial value calculated from the table sum defined in <a href="#/shop/tables" style="color:var(--color-primary); text-decoration:underline;">Table Management</a>.</span>
           </div>
         </div>
 

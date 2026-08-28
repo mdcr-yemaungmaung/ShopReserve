@@ -63,7 +63,7 @@ const ScreenS08 = (() => {
     // Role Limit Warning Banner if shop_staff
     const warningBanner = !isOwner ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md); font-weight:600; font-size:13px; border: 1px solid var(--color-error);">
-        🚫 ${lang === 'mm' ? 'ဝင်ရောက်ခွင့် မရှိပါ: ဤ S-08 ဝန်ထမ်းနှင့် စားပွဲစီမံခန့်ခွဲမှု (Master Data) မျက်နှာပြင်ကို ဆိုင်ပိုင်ရှင် (Shop Owner) တစ်ဦးတည်းသာ ဝင်ရောက်ပြင်ဆင်ခွင့် ရှိပါသည်။ (Role Limit: C-07 / C-15)' : 'Access Restricted: Only the Shop Owner (shop_owner) has permission to create and modify Staff & Table master data (C-07 / C-15).'}
+        🚫 ${lang === 'mm' ? 'ဝင်ရောက်ခွင့် မရှိပါ: ဤဝန်ထမ်းနှင့် စားပွဲစီမံခန့်ခွဲမှု (Master Data) မျက်နှာပြင်ကို ဆိုင်ပိုင်ရှင် (Shop Owner) တစ်ဦးတည်းသာ ဝင်ရောက်ပြင်ဆင်ခွင့် ရှိပါသည်။ (Role Limit: C-07 / C-15)' : 'Access Restricted: Only the Shop Owner (shop_owner) has permission to create and modify Staff & Table master data (C-07 / C-15).'}
       </div>
     ` : '';
 

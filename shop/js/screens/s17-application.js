@@ -45,7 +45,7 @@ const ScreenS17 = (() => {
 
           <p style="font-size:13px; color:#64748b; margin:0 0 20px 0; line-height:1.5;">
             ${lang === 'mm' 
-              ? 'စနစ်စီမံခန့်ခွဲသူများမှ သင်၏လုပ်ငန်းလိုင်စင်နှင့် အချက်အလက်များကို စိစစ်လျက်ရှိသည်။ ရုံးဖွင့်ရက် (၃) ရက်အတွင်း ဆက်သွယ်ပေးပါမည်။ စိစစ်အတည်ပြုပြီးပါက S-11 Portal ဝင်ရန် စကားဝှက်သတ်မှတ်လင့်ခ်ကို အီးမေးလ်ထံ ပေးပို့ပါမည်။' 
+              ? 'စနစ်စီမံခန့်ခွဲသူများမှ သင်၏လုပ်ငန်းလိုင်စင်နှင့် အချက်အလက်များကို စိစစ်လျက်ရှိသည်။ ရုံးဖွင့်ရက် (၃) ရက်အတွင်း ဆက်သွယ်ပေးပါမည်။ စိစစ်အတည်ပြုပြီးပါက Portal ဝင်ရန် စကားဝှက်သတ်မှတ်လင့်ခ်ကို အီးမေးလ်ထံ ပေးပို့ပါမည်။' 
               : 'Our operators are reviewing your business license and application. We will contact you within 3 business days. You will receive a password setup email once approved.'}
           </p>
 
@@ -257,7 +257,7 @@ const ScreenS17 = (() => {
           <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:10px; border-radius:10px;">
             <div style="font-size:10.5px; color:#a5b4fc; font-weight:700; text-transform:uppercase;">Step 1</div>
             <div style="font-size:12px; font-weight:700; color:white; margin-top:2px;">📝 ${lang === 'mm' ? 'ဖောင်တင်သွင်းခြင်း' : 'Form Submit'}</div>
-            <div style="font-size:10.5px; color:#cbd5e1; margin-top:2px;">S-17 Data Uploaded</div>
+            <div style="font-size:10.5px; color:#cbd5e1; margin-top:2px;">Data Uploaded</div>
           </div>
 
           <div style="background:rgba(234, 179, 8, 0.15); border:1px solid rgba(253, 224, 71, 0.3); padding:10px; border-radius:10px;">
@@ -275,7 +275,7 @@ const ScreenS17 = (() => {
           <div style="background:rgba(99, 102, 241, 0.15); border:1px solid rgba(165, 180, 252, 0.3); padding:10px; border-radius:10px;">
             <div style="font-size:10.5px; color:#c7d2fe; font-weight:700; text-transform:uppercase;">Step 4</div>
             <div style="font-size:12px; font-weight:700; color:white; margin-top:2px;">🔑 ${lang === 'mm' ? 'စကားဝှက်သတ်မှတ်ခြင်း' : 'Password Setup'}</div>
-            <div style="font-size:10.5px; color:#e0e7ff; margin-top:2px;">Access S-11 Shop Login</div>
+            <div style="font-size:10.5px; color:#e0e7ff; margin-top:2px;">Access Shop Login</div>
           </div>
 
         </div>
@@ -308,7 +308,7 @@ const ScreenS17 = (() => {
               ${lang === 'mm' ? `စနစ်စီမံခန့်ခွဲသူမှ ဤဆိုင်ကို အတည်ပြုပေးလိုက်ပါပြီ။ စကားဝှက်သတ်မှတ်ရန် လင့်ခ်ကို <strong>${queriedApp.email}</strong> ထံသို့ ပေးပို့ထားပါသည်။` : `System administrator approved this shop! A password setup URL was emailed to <strong>${queriedApp.email}</strong>.`}
             </p>
             <button class="btn btn-primary btn-sm" style="font-size:12px; font-weight:700; border-radius:8px; background:#10b981; border-color:#10b981;" onclick="Router.navigate('/shop/login')">
-              🔑 ${lang === 'mm' ? 'စကားဝှက်သတ်မှတ်၍ S-11 Portal သို့ ဝင်မည် →' : 'Open Password Setup & Log in to S-11 Portal →'}
+              🔑 ${lang === 'mm' ? 'စကားဝှက်သတ်မှတ်၍ Portal သို့ ဝင်မည် →' : 'Open Password Setup & Log in to Portal →'}
             </button>
           </div>
         ` : '';
@@ -396,14 +396,8 @@ const ScreenS17 = (() => {
           </button>
           
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <span style="background:#e0e7ff; color:#3730a3; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px; text-transform:uppercase;">
-              Pkg1 Core System
-            </span>
             <span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px;">
               Function ID: C-13
-            </span>
-            <span style="background:#fef08a; color:#854d0e; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:12px;">
-              Screen S-17
             </span>
           </div>
         </div>
@@ -741,12 +735,12 @@ const ScreenS17 = (() => {
       မင်္ဂလာပါ ဆိုင်လျှောက်ထားသူရှင့်၊<br><br>
       "<strong>${shopNameDisplay}</strong>" ဆိုင်လျှောက်ထားမှုအတွက် အထူးကျေးဇူးတင်ရှိပါသည်။<br>
       သင်၏ လျှောက်လွှာ ခြေရာခံနံပါတ်မှာ: <code style="font-weight:800; color:#4f46e5;">${refCode}</code> ဖြစ်ပါသည်။<br><br>
-      ကျွန်ုပ်တို့ စနစ်စီမံခန့်ခွဲသူများမှ သင်၏ လုပ်ငန်းလိုင်စင်နှင့် အချက်အလက်များကို စိစစ်လျက်ရှိပြီး၊ <strong>ရုံးဖွင့်ရက် (၃) ရက်အတွင်း</strong> ပြန်လည်ဆက်သွယ်ပေးမည် ဖြစ်ပါသည်။ S-17 မျက်နှာပြင်တွင် လျှောက်လွှာခြေရာခံနံပါတ်ဖြင့် အချိန်မရွေး ပြန်လည်စစ်ဆေးနိုင်ပါသည်။
+      ကျွန်ုပ်တို့ စနစ်စီမံခန့်ခွဲသူများမှ သင်၏ လုပ်ငန်းလိုင်စင်နှင့် အချက်အလက်များကို စိစစ်လျက်ရှိပြီး၊ <strong>ရုံးဖွင့်ရက် (၃) ရက်အတွင်း</strong> ပြန်လည်ဆက်သွယ်ပေးမည် ဖြစ်ပါသည်။ ဤမျက်နှာပြင်တွင် လျှောက်လွှာခြေရာခံနံပါတ်ဖြင့် အချိန်မရွေး ပြန်လည်စစ်ဆေးနိုင်ပါသည်။
     ` : `
       Dear Applicant,<br><br>
       Thank you for submitting your shop listing application for "<strong>${shopNameDisplay}</strong>".<br>
       Your Application Reference Code is: <code style="font-weight:800; color:#4f46e5;">${refCode}</code><br><br>
-      Our operations team is currently reviewing your business license and application. We will contact you within <strong>3 business days</strong>. You can track your status anytime on S-17 using your Reference Code.
+      Our operations team is currently reviewing your business license and application. We will contact you within <strong>3 business days</strong>. You can track your status anytime using your Reference Code.
     `;
 
     const email3Subject = lang === 'mm' 
@@ -760,19 +754,19 @@ const ScreenS17 = (() => {
     const email3Body = lang === 'mm' ? `
       မင်္ဂလာပါ ဆိုင်လျှောက်ထားသူရှင့်၊<br><br>
       သင်၏ "<strong>${shopNameDisplay}</strong>" ဆိုင်လျှောက်ထားမှုကို စနစ်စီမံခန့်ခွဲသူများမှ <strong>အတည်ပြုပေးလိုက်ပြီဖြစ်ကြောင်း</strong> ဝမ်းမြောက်စွာ အသိပေးအပ်ပါသည်။<br><br>
-      S-11 Shop Management Portal သို့ ဝင်ရောက်နိုင်ရန် ကျေးဇူးပြု၍ အောက်ပါ ခလုတ်ကို နှိပ်၍ အကောင့်စကားဝှက်ကို သတ်မှတ်ပေးပါ-<br>
+      Shop Management Portal သို့ ဝင်ရောက်နိုင်ရန် ကျေးဇူးပြု၍ အောက်ပါ ခလုတ်ကို နှိပ်၍ အကောင့်စကားဝှက်ကို သတ်မှတ်ပေးပါ-<br>
       <div style="margin-top:10px;">
         <button class="btn btn-primary btn-sm" style="font-size:12px; font-weight:800; background:#10b981; border-color:#10b981;" onclick="ScreenS17.closeEmailInboxModal(); Router.navigate('/shop/login');">
-          🔑 စကားဝှက်သတ်မှတ်၍ S-11 Portal သို့ ဝင်မည် →
+          🔑 စကားဝှက်သတ်မှတ်၍ Portal သို့ ဝင်မည် →
         </button>
       </div>
     ` : `
       Dear Applicant,<br><br>
       We are pleased to inform you that your shop "<strong>${shopNameDisplay}</strong>" has been <strong>APPROVED</strong> by system administrators!<br><br>
-      Please click the button below to set your account password and access the S-11 Shop Management Portal:<br>
+      Please click the button below to set your account password and access the Shop Management Portal:<br>
       <div style="margin-top:10px;">
         <button class="btn btn-primary btn-sm" style="font-size:12px; font-weight:800; background:#10b981; border-color:#10b981;" onclick="ScreenS17.closeEmailInboxModal(); Router.navigate('/shop/login');">
-          🔐 Set Password & Log In to S-11 Portal →
+          🔐 Set Password & Log In to Portal →
         </button>
       </div>
     `;
