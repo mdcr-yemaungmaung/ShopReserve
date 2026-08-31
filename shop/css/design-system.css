@@ -171,6 +171,40 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', '
   --sidebar-collapsed: 64px;
   --header-height: 64px;
   --mobile-nav-height: 56px;
+
+  /* === PWA & Touch Ergonomics === */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+  --touch-target-lg: 52px;
+  --btn-height-sm: 38px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 50px;
+  --pwa-safe-area-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  --pwa-safe-area-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
+/* === Global Touch & Interactive Primitives === */
+button,
+.btn,
+[role="button"],
+.stepper-btn,
+.tab-btn,
+.filter-chip,
+.admin-header__hamburger,
+.admin-sidebar__close-btn,
+.modal__close {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Fast tactile active press states */
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+[role="button"]:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
 }
 
 /* --- Typography Utility Classes --- */

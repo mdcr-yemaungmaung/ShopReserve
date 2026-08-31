@@ -299,11 +299,14 @@ var Components = (() => {
     }
 
     return `<aside class="admin-sidebar" id="admin-sidebar">
-      <div class="admin-sidebar__brand">
-        <div>
-          <div class="admin-sidebar__brand-logo">${brandName}</div>
-          <div class="admin-sidebar__brand-sub">${brandSub}</div>
+      <div class="admin-sidebar__brand" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="flex:1; min-width:0;">
+          <div class="admin-sidebar__brand-logo" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${brandName}</div>
+          <div class="admin-sidebar__brand-sub" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${brandSub}</div>
         </div>
+        <button class="admin-sidebar__close-btn" onclick="Components.closeSidebar()" title="Close Menu" style="background:#1E293B; border:1px solid #334155; color:#94A3B8; cursor:pointer; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0;">
+          ${icon('x', 16)}
+        </button>
       </div>
       <nav class="admin-sidebar__nav">
         ${menuItems.map(group => `
@@ -338,7 +341,9 @@ var Components = (() => {
       ${globalEmergencyBanner()}
       <header class="admin-header">
       <div class="admin-header__left">
-        <button class="admin-header__hamburger" onclick="Components.toggleSidebar()">${icon('menu')}</button>
+        <button class="admin-header__hamburger" onclick="Components.toggleSidebar()" title="Toggle Navigation Menu">
+          ${icon('menu')}
+        </button>
         <div class="admin-header__brand-title">${hubTitle}</div>
         <div class="admin-header__search-container">
           <span class="admin-header__search-icon">${icon('search')}</span>
@@ -408,6 +413,16 @@ var Components = (() => {
     const overlay = document.getElementById('sidebar-overlay');
     if (sidebar) sidebar.classList.remove('open');
     if (overlay) overlay.classList.remove('active');
+  }
+
+  // Global keydown handler for Escape key closing drawer
+  if (typeof window !== 'undefined' && !window._sidebarEscapeBound) {
+    window._sidebarEscapeBound = true;
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSidebar();
+      }
+    });
   }
 
   // === Status Badge ===
