@@ -21,11 +21,129 @@ const ScreenS09 = (() => {
   let selectedSeatTags = [];
 
   const tableTags = [
-    { code: 'near_tv', name: 'Near TV', name_mm: 'တီဗီ အနီး' },
-    { code: 'window', name: 'Window Seat', name_mm: 'ပြတင်းပေါက်နား' },
-    { code: 'quiet', name: 'Quiet Zone', name_mm: 'တိတ်ဆိတ်သောနေရာ' },
-    { code: 'smoking', name: 'Outdoor / Smoking', name_mm: 'ပြင်ပ/ဆေးလိပ်သောက်ဧရိယာ' }
+    { code: 'near_tv', name: '📺 Near TV', name_mm: '📺 တီဗီ အနီး' },
+    { code: 'window', name: '🪟 Window View', name_mm: '🪟 ပြတင်းပေါက်နား' },
+    { code: 'quiet', name: '🔇 Quiet Zone', name_mm: '🔇 တိတ်ဆိတ်သောနေရာ' },
+    { code: 'private_room', name: '🚪 Private Room', name_mm: '🚪 သီးသန့်ခန်း' },
+    { code: 'outdoor', name: '🌿 Outdoor / Terrace', name_mm: '🌿 ပြင်ပ/ဝရံတာ' },
+    { code: 'counter', name: '🍸 Bar Counter', name_mm: '🍸 ဘားကောင်တာ' }
   ];
+
+  function matchesTablePreference(table, selectedTags) {
+    if (!selectedTags || selectedTags.length === 0) return true;
+    const tableTagsList = (table.seat_tags || []).map(t => String(t).toLowerCase());
+    const tableType = String(table.type || '').toLowerCase();
+    
+    return selectedTags.every(tagCode => {
+      const code = tagCode.toLowerCase();
+      if (code === 'near_tv' || code === 'tv_front') {
+        return tableTagsList.includes('near_tv') || tableTagsList.includes('tv_front');
+      }
+      if (code === 'window') {
+        return tableTagsList.includes('window') || tableType.includes('window');
+      }
+      if (code === 'quiet') {
+        return tableTagsList.includes('quiet');
+      }
+      if (code === 'private_room' || code === 'room' || code === 'vip') {
+        return tableTagsList.includes('private_room') || tableType.includes('vip') || tableType.includes('private');
+      }
+      if (code === 'outdoor' || code === 'smoking' || code === 'terrace') {
+        return tableTagsList.includes('outdoor') || tableTagsList.includes('smoking') || tableType.includes('garden') || tableType.includes('terrace') || tableType.includes('outdoor');
+      }
+      if (code === 'counter' || code === 'bar') {
+        return tableTagsList.includes('counter') || tableType.includes('bar');
+      }
+      if (code === 'booth') {
+        return tableType.includes('booth');
+      }
+      return tableTagsList.includes(code);
+    });
+  }
+
+  function getFilteredTables() {
+    const allTables = MockData.tables || [];
+    return allTables.filter(t => {
+      const fitsParty = (t.seats || 2) >= guestCount;
+      const matchesPref = matchesTablePreference(t, selectedSeatTags);
+      return fitsParty && matchesPref;
+    });
+  }
+
+  function renderTableSelectHtml(selectedTableValue = '') {
+    const lang = I18n.getLang();
+    const filtered = getFilteredTables();
+    
+    // Option C: check if currently selected table is in filtered list
+    const isSelectedStillValid = selectedTableValue && filtered.some(t => t.name === selectedTableValue);
+    const currentVal = isSelectedStillValid ? selectedTableValue : '';
+
+    let optionsHtml = '';
+    if (filtered.length > 0) {
+      const autoLabel = selectedSeatTags.length > 0
+        ? (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ကိုက်ညီ)` : `Auto Assign (${filtered.length} matching tables)`)
+        : (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ရနိုင်)` : `Auto Assign (${filtered.length} available tables)`);
+      optionsHtml = `<option value="">${autoLabel}</option>` + 
+        filtered.map(t => `<option value="${t.name}" ${t.name === currentVal ? 'selected' : ''}>${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('');
+    } else {
+      optionsHtml = `<option value="" disabled selected>${lang === 'mm' ? '⚠️ ကိုက်ညီသော စားပွဲ မရှိပါ' : '⚠️ No matching tables'}</option>`;
+    }
+
+    const activePrefNames = selectedSeatTags.map(c => {
+      const tag = tableTags.find(t => t.code === c);
+      return tag ? (lang === 'mm' ? tag.name_mm : tag.name) : c;
+    }).join(', ');
+
+    const noMatchWarningHtml = filtered.length === 0
+      ? `
+        <div id="s09-no-table-warning" style="display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; margin-top: 6px; font-size: 12px; color: #991B1B;">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #DC2626; flex-shrink: 0; margin-top: 1px;">warning</span>
+          <div>
+            <strong>${lang === 'mm' ? 'ကိုက်ညီသော စားပွဲ မရှိပါ:' : 'No matching tables found:'}</strong> 
+            ${lang === 'mm' 
+              ? `ဧည့်သည် ${guestCount} ဦး နှင့် ${activePrefNames ? `[${activePrefNames}]` : ''} အတွက် သင့်တော်သော စားပွဲ မရှိပါ။ ဧည့်သည် ဦးရေ လျှော့ချပါ သို့မဟုတ် Preference ဖျက်ပါ။` 
+              : `No tables with capacity ≥ ${guestCount} match ${activePrefNames ? `[${activePrefNames}]` : 'criteria'}. Try clearing preference or reducing guest count.`}
+          </div>
+        </div>
+      `
+      : `
+        <div id="s09-table-filter-hint" style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #64748B;">
+          <span>${lang === 'mm' ? `ဧည့်သည် ${guestCount} ဦး နှင့် ကိုက်ညီသော စားပွဲ ${filtered.length} ခု တွေ့ရှိသည်` : `Filtered by ${guestCount} guests${selectedSeatTags.length > 0 ? ` & ${activePrefNames}` : ''} (${filtered.length} tables)`}</span>
+          ${selectedSeatTags.length > 0 ? `<button type="button" onclick="ScreenS09.clearSeatPreferences()" style="background: none; border: none; color: #0F4C5C; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">${lang === 'mm' ? 'Clear Filter' : 'Clear Filter'}</button>` : ''}
+        </div>
+      `;
+
+    return `
+      <select id="mb-table" onchange="ScreenS09.updateSummary()" style="width: 100%; height: 44px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 14px; font-size: 14px; color: #0F4C5C; font-weight: 600; background: #f4f8fa;">
+        ${optionsHtml}
+      </select>
+      ${noMatchWarningHtml}
+    `;
+  }
+
+  function refreshTableSelect() {
+    const container = document.getElementById('s09-table-select-container');
+    const tableSelect = document.getElementById('mb-table');
+    const currentVal = tableSelect ? tableSelect.value : '';
+    if (container) {
+      container.innerHTML = renderTableSelectHtml(currentVal);
+    }
+  }
+
+  function clearSeatPreferences() {
+    selectedSeatTags = [];
+    const tagsContainer = document.getElementById('s09-tags-container');
+    if (tagsContainer) {
+      const tagButtons = tagsContainer.querySelectorAll('button[data-tag-code]');
+      tagButtons.forEach(btn => {
+        btn.style.border = '1.5px solid #CBD5E1';
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#334155';
+      });
+    }
+    refreshTableSelect();
+    updateSummary();
+  }
 
   const timeSlots = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'];
 
@@ -110,7 +228,7 @@ const ScreenS09 = (() => {
     }
 
     return `
-      <div style="background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%); border: 1px solid rgba(15, 76, 92, 0.14); border-radius: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(15, 76, 92, 0.03);">
+      <div class="s09-month-calendar-box" style="background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%); border: 1px solid rgba(15, 76, 92, 0.14); border-radius: 16px; padding: 14px; box-shadow: 0 2px 8px rgba(15, 76, 92, 0.03);">
         
         <!-- Month Navigation Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
@@ -214,21 +332,6 @@ const ScreenS09 = (() => {
           <!-- Left Column -->
           <div style="display: flex; flex-direction: column;">
             
-            <!-- BOOKING SOURCE Card -->
-            <div class="stitch-card">
-              <span class="stitch-label">${lang === 'mm' ? 'ဘွတ်ကင် အရင်းအမြစ်' : 'BOOKING SOURCE'}</span>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <button type="button" id="btn-phone" onclick="ScreenS09.setSource('phone')" class="${bookingSource === 'phone' ? 'stitch-btn-active' : 'stitch-btn-inactive'}" style="height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                  <span class="material-symbols-outlined" style="font-size: 20px;">call</span>
-                  ${lang === 'mm' ? 'ဖုန်းဖြင့် ဘွတ်ကင်' : 'Phone Call'}
-                </button>
-                <button type="button" id="btn-walkin" onclick="ScreenS09.setSource('walkin')" class="${bookingSource === 'walkin' ? 'stitch-btn-active' : 'stitch-btn-inactive'}" style="height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                  <span class="material-symbols-outlined" style="font-size: 20px;">directions_walk</span>
-                  ${lang === 'mm' ? 'လူကိုယ်တိုင်' : 'Walk-in'}
-                </button>
-              </div>
-            </div>
-
             <!-- CUSTOMER INFORMATION Card -->
             <div class="stitch-card" style="display: flex; flex-direction: column; gap: 14px;">
               <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'ဧည့်သည် အချက်အလက်' : 'CUSTOMER INFORMATION'}</span>
@@ -301,10 +404,9 @@ const ScreenS09 = (() => {
               </div>
               <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
                 <label style="font-size: 13px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
-                <select id="mb-table" onchange="ScreenS09.updateSummary()" style="width: 100%; height: 44px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 14px; font-size: 14px; color: #0F4C5C; font-weight: 600; background: #f4f8fa;">
-                  <option value="">${lang === 'mm' ? 'စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (Auto Assign)' : 'Auto Assign'}</option>
-                  ${(MockData.tables || []).map(t => `<option value="${t.name}">${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('')}
-                </select>
+                <div id="s09-table-select-container">
+                  ${renderTableSelectHtml()}
+                </div>
               </div>
             </div>
 
@@ -342,7 +444,7 @@ const ScreenS09 = (() => {
     `;
 
     const content = `
-      ${Components.pageHeader(I18n.t('manual_booking'), lang === 'mm' ? 'ဖုန်း သို့မဟုတ် လူကိုယ်တိုင်လာရောက်သော ဧည့်သည်များအတွက် ဘွတ်ကင်အသစ် စာရင်းသွင်းရန်' : 'Create a new reservation for a walk-in or phone customer.')}
+      ${Components.pageHeader(I18n.t('manual_booking'), lang === 'mm' ? 'ဖုန်းဖြင့် ဘွတ်ကင်အသစ် ကြိုတင်စာရင်းသွင်းရန်' : 'Create a new phone reservation.')}
       ${formHtml}
     `;
 
@@ -423,6 +525,7 @@ const ScreenS09 = (() => {
     guestCount = Math.max(1, Math.min(20, guestCount + val));
     const el = document.getElementById('guest-count');
     if (el) el.innerText = guestCount;
+    refreshTableSelect();
     updateSummary();
   }
 
@@ -445,6 +548,9 @@ const ScreenS09 = (() => {
         btn.style.color = isSelected ? '#FFFFFF' : '#334155';
       });
     }
+
+    refreshTableSelect();
+    updateSummary();
   }
 
   function updateSummary() {
@@ -458,11 +564,20 @@ const ScreenS09 = (() => {
 
     const tableSelect = document.getElementById('mb-table');
     const tableStatusEl = document.getElementById('summary-table-status');
-    if (tableStatusEl && tableSelect) {
-      const val = tableSelect.value;
+    if (tableStatusEl) {
+      const val = tableSelect ? tableSelect.value : '';
+      const filtered = getFilteredTables();
       const availText = lang === 'mm' ? 'ရရှိနိုင်ပါသည်' : 'Available';
       const autoText = lang === 'mm' ? 'စနစ်မှ အလိုအလျောက် သတ်မှတ်မည်' : 'Auto Assign';
-      tableStatusEl.innerText = val ? `${val} (${availText})` : autoText;
+      const noMatchText = lang === 'mm' ? 'ကိုက်ညီသော စားပွဲမရှိပါ' : 'No matching table';
+      
+      if (val) {
+        tableStatusEl.innerText = `${val} (${availText})`;
+      } else if (filtered.length > 0) {
+        tableStatusEl.innerText = `${autoText} (${filtered[0].name})`;
+      } else {
+        tableStatusEl.innerText = noMatchText;
+      }
     }
   }
 
@@ -543,6 +658,8 @@ const ScreenS09 = (() => {
     setTimeSlot,
     adjustGuests,
     togglePreferredTag, 
+    clearSeatPreferences,
+    refreshTableSelect,
     updateSummary,
     toggleNetwork, 
     toggleConflict, 

@@ -398,6 +398,27 @@ button:active:not(:disabled),
   margin-bottom: 16px;
 }
 
+@media (max-width: 1024px) {
+  #s09-screen .stitch-card,
+  #s09-form .stitch-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 24px !important;
+  }
+
+  #s09-screen #s09-calendar-wrapper > div,
+  #s09-screen .s09-month-calendar-box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 6px 0 !important;
+  }
+}
+
 .stitch-label {
   font-family: 'Inter', sans-serif;
   font-size: 11px;

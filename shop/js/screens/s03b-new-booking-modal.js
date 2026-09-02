@@ -15,11 +15,129 @@ const ScreenS03B = (() => {
   let selectedSeatTags = [];
 
   const tableTags = [
-    { code: 'near_tv', name: 'Near TV', name_mm: 'တီဗီ အနီး' },
-    { code: 'window', name: 'Window Seat', name_mm: 'ပြတင်းပေါက်နား' },
-    { code: 'quiet', name: 'Quiet Zone', name_mm: 'တိတ်ဆိတ်သောနေရာ' },
-    { code: 'smoking', name: 'Outdoor / Smoking', name_mm: 'ပြင်ပ/ဆေးလိပ်သောက်ဧရိယာ' }
+    { code: 'near_tv', name: '📺 Near TV', name_mm: '📺 တီဗီ အနီး' },
+    { code: 'window', name: '🪟 Window View', name_mm: '🪟 ပြတင်းပေါက်နား' },
+    { code: 'quiet', name: '🔇 Quiet Zone', name_mm: '🔇 တိတ်ဆိတ်သောနေရာ' },
+    { code: 'private_room', name: '🚪 Private Room', name_mm: '🚪 သီးသန့်ခန်း' },
+    { code: 'outdoor', name: '🌿 Outdoor / Terrace', name_mm: '🌿 ပြင်ပ/ဝရံတာ' },
+    { code: 'counter', name: '🍸 Bar Counter', name_mm: '🍸 ဘားကောင်တာ' }
   ];
+
+  function matchesTablePreference(table, selectedTags) {
+    if (!selectedTags || selectedTags.length === 0) return true;
+    const tableTagsList = (table.seat_tags || []).map(t => String(t).toLowerCase());
+    const tableType = String(table.type || '').toLowerCase();
+    
+    return selectedTags.every(tagCode => {
+      const code = tagCode.toLowerCase();
+      if (code === 'near_tv' || code === 'tv_front') {
+        return tableTagsList.includes('near_tv') || tableTagsList.includes('tv_front');
+      }
+      if (code === 'window') {
+        return tableTagsList.includes('window') || tableType.includes('window');
+      }
+      if (code === 'quiet') {
+        return tableTagsList.includes('quiet');
+      }
+      if (code === 'private_room' || code === 'room' || code === 'vip') {
+        return tableTagsList.includes('private_room') || tableType.includes('vip') || tableType.includes('private');
+      }
+      if (code === 'outdoor' || code === 'smoking' || code === 'terrace') {
+        return tableTagsList.includes('outdoor') || tableTagsList.includes('smoking') || tableType.includes('garden') || tableType.includes('terrace') || tableType.includes('outdoor');
+      }
+      if (code === 'counter' || code === 'bar') {
+        return tableTagsList.includes('counter') || tableType.includes('bar');
+      }
+      if (code === 'booth') {
+        return tableType.includes('booth');
+      }
+      return tableTagsList.includes(code);
+    });
+  }
+
+  function getFilteredTables() {
+    const allTables = MockData.tables || [];
+    return allTables.filter(t => {
+      const fitsParty = (t.seats || 2) >= guestCount;
+      const matchesPref = matchesTablePreference(t, selectedSeatTags);
+      return fitsParty && matchesPref;
+    });
+  }
+
+  function renderTableSelectHtml(selectedTableValue = '') {
+    const lang = I18n.getLang();
+    const filtered = getFilteredTables();
+    
+    // Option C: check if currently selected table is in filtered list
+    const isSelectedStillValid = selectedTableValue && filtered.some(t => t.name === selectedTableValue);
+    const currentVal = isSelectedStillValid ? selectedTableValue : '';
+
+    let optionsHtml = '';
+    if (filtered.length > 0) {
+      const autoLabel = selectedSeatTags.length > 0
+        ? (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ကိုက်ညီ)` : `Auto Assign (${filtered.length} matching tables)`)
+        : (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ရနိုင်)` : `Auto Assign (${filtered.length} available tables)`);
+      optionsHtml = `<option value="">${autoLabel}</option>` + 
+        filtered.map(t => `<option value="${t.name}" ${t.name === currentVal ? 'selected' : ''}>${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('');
+    } else {
+      optionsHtml = `<option value="" disabled selected>${lang === 'mm' ? '⚠️ ကိုက်ညီသော စားပွဲ မရှိပါ' : '⚠️ No matching tables'}</option>`;
+    }
+
+    const activePrefNames = selectedSeatTags.map(c => {
+      const tag = tableTags.find(t => t.code === c);
+      return tag ? (lang === 'mm' ? tag.name_mm : tag.name) : c;
+    }).join(', ');
+
+    const noMatchWarningHtml = filtered.length === 0
+      ? `
+        <div id="s03b-no-table-warning" style="display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; margin-top: 4px; font-size: 11.5px; color: #991B1B;">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: #DC2626; flex-shrink: 0; margin-top: 1px;">warning</span>
+          <div>
+            <strong>${lang === 'mm' ? 'ကိုက်ညီသော စားပွဲ မရှိပါ:' : 'No matching tables:'}</strong> 
+            ${lang === 'mm' 
+              ? `ဧည့်သည် ${guestCount} ဦး နှင့် ${activePrefNames ? `[${activePrefNames}]` : ''} အတွက် သင့်တော်သော စားပွဲ မရှိပါ။` 
+              : `No tables with capacity ≥ ${guestCount} match ${activePrefNames ? `[${activePrefNames}]` : 'criteria'}.`}
+          </div>
+        </div>
+      `
+      : `
+        <div id="s03b-table-filter-hint" style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px; font-size: 11px; color: #64748B;">
+          <span>${lang === 'mm' ? `ဧည့်သည် ${guestCount} ဦး နှင့် ကိုက်ညီသော စားပွဲ ${filtered.length} ခု တွေ့ရှိသည်` : `Filtered by ${guestCount} guests${selectedSeatTags.length > 0 ? ` & ${activePrefNames}` : ''} (${filtered.length} tables)`}</span>
+          ${selectedSeatTags.length > 0 ? `<button type="button" onclick="ScreenS03B.clearSeatPreferences()" style="background: none; border: none; color: #0F4C5C; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">Clear</button>` : ''}
+        </div>
+      `;
+
+    return `
+      <select id="new-book-table" onchange="ScreenS03B.updateSummary()" style="width: 100%; height: 40px; border: 1px solid #c7c5d0; border-radius: 10px; padding: 0 12px; font-size: 13px; color: #0F4C5C; font-weight: 600; background: #f4f8fa;">
+        ${optionsHtml}
+      </select>
+      ${noMatchWarningHtml}
+    `;
+  }
+
+  function refreshTableSelect() {
+    const container = document.getElementById('s03b-table-select-container');
+    const tableSelect = document.getElementById('new-book-table');
+    const currentVal = tableSelect ? tableSelect.value : '';
+    if (container) {
+      container.innerHTML = renderTableSelectHtml(currentVal);
+    }
+  }
+
+  function clearSeatPreferences() {
+    selectedSeatTags = [];
+    const tagsContainer = document.getElementById('s03b-tags-container');
+    if (tagsContainer) {
+      const tagButtons = tagsContainer.querySelectorAll('button[data-tag-code]');
+      tagButtons.forEach(btn => {
+        btn.style.border = '1.5px solid #CBD5E1';
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#334155';
+      });
+    }
+    refreshTableSelect();
+    updateSummary();
+  }
 
   const timeSlots = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'];
 
@@ -302,10 +420,9 @@ const ScreenS03B = (() => {
               </div>
               <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
                 <label style="font-size: 12px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
-                <select id="new-book-table" onchange="ScreenS03B.updateSummary()" style="width: 100%; height: 40px; border: 1px solid #c7c5d0; border-radius: 10px; padding: 0 12px; font-size: 13px; color: #0F4C5C; font-weight: 600; background: #f4f8fa;">
-                  <option value="">${lang === 'mm' ? 'စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (Auto Assign)' : 'Auto Assign'}</option>
-                  ${(MockData.tables || []).map(t => `<option value="${t.name}">${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('')}
-                </select>
+                <div id="s03b-table-select-container">
+                  ${renderTableSelectHtml()}
+                </div>
               </div>
             </div>
 
@@ -433,6 +550,7 @@ const ScreenS03B = (() => {
     guestCount = Math.max(1, Math.min(20, guestCount + val));
     const el = document.getElementById('s03b-guest-count');
     if (el) el.innerText = guestCount;
+    refreshTableSelect();
     updateSummary();
   }
 
@@ -455,6 +573,9 @@ const ScreenS03B = (() => {
         btn.style.color = isSelected ? '#FFFFFF' : '#334155';
       });
     }
+
+    refreshTableSelect();
+    updateSummary();
   }
 
   function updateSummary() {
@@ -531,6 +652,8 @@ const ScreenS03B = (() => {
     setTimeSlot,
     adjustGuests,
     togglePreferredTag,
+    clearSeatPreferences,
+    refreshTableSelect,
     updateSummary
   };
 })();

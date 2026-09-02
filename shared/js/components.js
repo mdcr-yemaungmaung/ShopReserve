@@ -73,38 +73,42 @@ var Components = (() => {
     return svg;
   }
 
-  // === Language Switcher (Globe Icon Dropdown - Option 1) ===
+  // === Language Switcher (Globe Icon Dropdown - Option 1 Refined Popover) ===
   function langSwitcher() {
     const lang = I18n.getLang();
     const languages = [
-      { code: 'en', label: 'English', flag: '🇺🇸', shortLabel: 'EN' },
-      { code: 'mm', label: 'မြန်မာစာ', flag: '🇲🇲', shortLabel: 'MM' },
-      { code: 'ja', label: '日本語', flag: '🇯🇵', shortLabel: 'JA' }
+      { code: 'en', nativeName: 'English', subLabel: 'English (US)', flag: '🇺🇸', shortLabel: 'EN' },
+      { code: 'mm', nativeName: 'မြန်မာစာ', subLabel: 'Myanmar (Burmese)', flag: '🇲🇲', shortLabel: 'MM' },
+      { code: 'ja', nativeName: '日本語', subLabel: 'Japanese (日本語)', flag: '🇯🇵', shortLabel: 'JA' }
     ];
     const currentLang = languages.find(l => l.code === lang) || languages[0];
 
     return `
       <div class="dropdown lang-dropdown" id="header-lang-dropdown">
-        <button class="lang-dropdown__btn" onclick="this.parentElement.querySelector('.dropdown__menu').classList.toggle('open')" title="${I18n.t('change_language') || 'Language'}">
+        <button class="lang-dropdown__btn" onclick="this.parentElement.querySelector('.dropdown__menu').classList.toggle('open')" title="Language Selection" id="lang-switcher-btn" aria-label="Select Language">
           <span class="lang-dropdown__icon">${icon('globe', 16)}</span>
           <span class="lang-dropdown__current">${currentLang.shortLabel}</span>
           <span class="lang-dropdown__chevron">${icon('chevronDown', 12)}</span>
         </button>
-        <div class="dropdown__menu dropdown__menu--right dropdown__menu--lang">
+        <div class="dropdown__menu dropdown__menu--right dropdown__menu--lang" id="lang-switcher-menu">
           <div class="dropdown-lang-header">
-            <span class="dropdown-lang-title">🌐 Language / 言語 / ဘာသာစကား</span>
+            <span class="dropdown-lang-title">Language</span>
+            <span class="dropdown-lang-active-tag">${currentLang.shortLabel}</span>
           </div>
           <div class="dropdown-lang-list">
-            ${languages.map(l => `
-              <div class="dropdown-lang-item ${l.code === lang ? 'active' : ''}" onclick="I18n.setLang('${l.code}'); App.render();">
-                <span class="dropdown-lang-flag">${l.flag}</span>
-                <div class="dropdown-lang-info">
-                  <span class="dropdown-lang-name">${l.label}</span>
-                  <span class="dropdown-lang-code">${l.shortLabel}</span>
+            ${languages.map(l => {
+              const isActive = l.code === lang;
+              return `
+              <div class="dropdown-lang-item ${isActive ? 'active' : ''}" onclick="I18n.setLang('${l.code}'); App.render();" id="lang-item-${l.code}" role="button" tabindex="0">
+                <div class="dropdown-lang-flag-badge">
+                  <span class="dropdown-lang-flag">${l.flag}</span>
                 </div>
-                ${l.code === lang ? '<span class="dropdown-lang-check">✓</span>' : ''}
+                <div class="dropdown-lang-info">
+                  <span class="dropdown-lang-name">${l.nativeName}</span>
+                  <span class="dropdown-lang-sub">${l.subLabel}</span>
+                </div>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
       </div>
@@ -523,12 +527,21 @@ var Components = (() => {
     if (overlay) overlay.classList.remove('active');
   }
 
-  // Global keydown handler for Escape key closing drawer
+  // Global keydown handler for Escape key closing drawer & dropdowns
   if (typeof window !== 'undefined' && !window._sidebarEscapeBound) {
     window._sidebarEscapeBound = true;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSidebar();
+        document.querySelectorAll('.dropdown__menu.open').forEach(menu => menu.classList.remove('open'));
+      }
+    });
+
+    // Close open dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown') && !e.target.closest('.sidebar-store-dropdown')) {
+        document.querySelectorAll('.dropdown__menu.open').forEach(menu => menu.classList.remove('open'));
+        document.querySelectorAll('.sidebar-store-menu.open').forEach(menu => menu.classList.remove('open'));
       }
     });
   }
