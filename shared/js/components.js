@@ -73,13 +73,42 @@ var Components = (() => {
     return svg;
   }
 
-  // === Language Switcher ===
+  // === Language Switcher (Globe Icon Dropdown - Option 1) ===
   function langSwitcher() {
     const lang = I18n.getLang();
-    return `<div class="lang-switcher">
-      <button class="lang-switcher__btn ${lang === 'en' ? 'active' : ''}" onclick="I18n.setLang('en'); App.render();">${I18n.t('lang_en')}</button>
-      <button class="lang-switcher__btn ${lang === 'mm' ? 'active' : ''}" onclick="I18n.setLang('mm'); App.render();">${I18n.t('lang_mm')}</button>
-    </div>`;
+    const languages = [
+      { code: 'en', label: 'English', flag: '🇺🇸', shortLabel: 'EN' },
+      { code: 'mm', label: 'မြန်မာစာ', flag: '🇲🇲', shortLabel: 'MM' },
+      { code: 'ja', label: '日本語', flag: '🇯🇵', shortLabel: 'JA' }
+    ];
+    const currentLang = languages.find(l => l.code === lang) || languages[0];
+
+    return `
+      <div class="dropdown lang-dropdown" id="header-lang-dropdown">
+        <button class="lang-dropdown__btn" onclick="this.parentElement.querySelector('.dropdown__menu').classList.toggle('open')" title="${I18n.t('change_language') || 'Language'}">
+          <span class="lang-dropdown__icon">${icon('globe', 16)}</span>
+          <span class="lang-dropdown__current">${currentLang.shortLabel}</span>
+          <span class="lang-dropdown__chevron">${icon('chevronDown', 12)}</span>
+        </button>
+        <div class="dropdown__menu dropdown__menu--right dropdown__menu--lang">
+          <div class="dropdown-lang-header">
+            <span class="dropdown-lang-title">🌐 Language / 言語 / ဘာသာစကား</span>
+          </div>
+          <div class="dropdown-lang-list">
+            ${languages.map(l => `
+              <div class="dropdown-lang-item ${l.code === lang ? 'active' : ''}" onclick="I18n.setLang('${l.code}'); App.render();">
+                <span class="dropdown-lang-flag">${l.flag}</span>
+                <div class="dropdown-lang-info">
+                  <span class="dropdown-lang-name">${l.label}</span>
+                  <span class="dropdown-lang-code">${l.shortLabel}</span>
+                </div>
+                ${l.code === lang ? '<span class="dropdown-lang-check">✓</span>' : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // === Global SEV1 Emergency Announcement Banner (Point 3 of Spec) ===
@@ -298,6 +327,65 @@ var Components = (() => {
       ];
     }
 
+    let storeSwitcherHtml = '';
+    if (portal === 'shop') {
+      if (auth.role === 'shop_owner') {
+        storeSwitcherHtml = `
+          <div class="sidebar-store-section">
+            <div class="sidebar-store-dropdown" id="sidebar-store-dropdown">
+              <button class="sidebar-store-btn" onclick="this.parentElement.querySelector('.sidebar-store-menu').classList.toggle('open')" title="${I18n.t('switch_store')}">
+                <span class="sidebar-store-icon">🏪</span>
+                <div class="sidebar-store-info">
+                  <div class="sidebar-store-role-label">${I18n.t('switch_store')}</div>
+                  <div class="sidebar-store-name">${auth.shopName || 'The Glass Pavilion'}</div>
+                </div>
+                <span class="sidebar-store-chevron">${icon('chevronDown', 14)}</span>
+              </button>
+              <div class="sidebar-store-menu">
+                <div class="sidebar-store-menu-header">
+                  <span class="sidebar-store-menu-title">🏪 ${I18n.t('my_branches')}</span>
+                  <span class="sidebar-store-count-badge">3 Active</span>
+                </div>
+                <div class="sidebar-store-menu-list">
+                  ${shopBranches.map(branch => {
+                    const isSelected = (auth.shopName === branch.shortName || auth.shopName === branch.name || (branch.isMain && (!auth.shopName || auth.shopName === 'The Glass Pavilion')));
+                    return `
+                      <div class="sidebar-store-menu-item ${isSelected ? 'selected' : ''}" onclick="Components.switchShopBranch('${branch.shortName}', '${branch.name}')">
+                        <span class="sidebar-store-item-icon">🏢</span>
+                        <div class="sidebar-store-item-info">
+                          <div class="sidebar-store-item-name">${branch.name}</div>
+                          <div class="sidebar-store-item-meta">${branch.area} ${branch.isMain ? '• Primary' : ''}</div>
+                        </div>
+                        ${isSelected ? '<span class="sidebar-store-item-check">✓</span>' : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+                <div class="sidebar-store-menu-footer">
+                  <button class="sidebar-store-add-btn" onclick="Router.navigate('/shop/application'); Components.closeSidebar();">
+                    <span>${I18n.t('add_branch')}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        storeSwitcherHtml = `
+          <div class="sidebar-store-section">
+            <div class="sidebar-store-static-badge" title="${I18n.t('assigned_branch')}">
+              <span class="sidebar-store-icon">🏢</span>
+              <div class="sidebar-store-info">
+                <div class="sidebar-store-role-label">${I18n.t('assigned_branch')}</div>
+                <div class="sidebar-store-name">${auth.shopName || 'The Glass Pavilion'}</div>
+              </div>
+              <span class="sidebar-store-staff-tag">${I18n.t('role_shop_staff')}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     return `<aside class="admin-sidebar" id="admin-sidebar">
       <div class="admin-sidebar__brand" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
         <div style="flex:1; min-width:0;">
@@ -308,6 +396,7 @@ var Components = (() => {
           ${icon('x', 16)}
         </button>
       </div>
+      ${storeSwitcherHtml}
       <nav class="admin-sidebar__nav">
         ${menuItems.map(group => `
           ${group.section ? `<div class="admin-sidebar__section-title">${group.section}</div>` : ''}
@@ -329,6 +418,26 @@ var Components = (() => {
     </aside>`;
   }
 
+  // === Shop Branches for Store Switcher ===
+  const shopBranches = [
+    { id: 'b1', name: 'The Glass Pavilion (Main Branch - Bahan)', shortName: 'The Glass Pavilion', area: 'Bahan', isMain: true },
+    { id: 'b2', name: 'The Glass Pavilion (Downtown Branch)', shortName: 'The Glass Pavilion (Downtown)', area: 'Downtown', isMain: false },
+    { id: 'b3', name: 'The Glass Bistro (Inya Lake)', shortName: 'The Glass Bistro', area: 'Inya Lake', isMain: false }
+  ];
+
+  function switchShopBranch(shortName, fullName) {
+    if (Router.authState && Router.authState.shop) {
+      Router.authState.shop.shopName = shortName || fullName;
+    }
+    const displayName = fullName || shortName;
+    const title = I18n.t('branch_switched_title');
+    const msg = I18n.t('branch_switched_msg', { name: displayName });
+    if (typeof showToast === 'function') {
+      showToast('success', title, msg);
+    }
+    App.render();
+  }
+
   // === Admin Header ===
   function adminHeader(title, portal) {
     const auth = Router.getAuth();
@@ -344,7 +453,6 @@ var Components = (() => {
         <button class="admin-header__hamburger" onclick="Components.toggleSidebar()" title="Toggle Navigation Menu">
           ${icon('menu')}
         </button>
-        <div class="admin-header__brand-title">${hubTitle}</div>
         <div class="admin-header__search-container">
           <span class="admin-header__search-icon">${icon('search')}</span>
           <input type="text" class="admin-header__search-input" placeholder="Search..." onkeydown="Components.handleHeaderSearch(event, this)" id="header-search-input" />
@@ -364,11 +472,11 @@ var Components = (() => {
           <div class="dropdown__menu dropdown__menu--right dropdown__menu--notifications">
             <div class="dropdown-notif-header">
               <span class="dropdown-notif-title">${I18n.t('menu_notifications')}</span>
-              ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.shopNotifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${lang === 'mm' ? 'အားလုံးဖတ်ပြီး' : 'Mark all read'}</button>` : ''}
+              ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.shopNotifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${lang === 'mm' ? 'အားလုံးဖတ်ပြီး' : (lang === 'ja' ? 'すべて既読' : 'Mark all read')}</button>` : ''}
             </div>
             <div class="dropdown-notif-list">
               ${shopNotifs.length === 0 ? `
-                <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${lang === 'mm' ? 'အကြောင်းကြားချက် မရှိပါ' : 'No notifications'}</div>
+                <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${lang === 'mm' ? 'အကြောင်းကြားချက် မရှိပါ' : (lang === 'ja' ? '通知はありません' : 'No notifications')}</div>
               ` : shopNotifs.slice(0, 5).map(n => `
                 <div class="dropdown-notif-item ${!n.readAt ? 'unread' : ''}" onclick="Router.navigate('/shop/notifications');">
                   <div style="flex:1;">
@@ -380,7 +488,7 @@ var Components = (() => {
               `).join('')}
             </div>
             <div class="dropdown-notif-footer">
-              <button onclick="Router.navigate('/shop/notifications');">${lang === 'mm' ? 'အကြောင်းကြားချက်အားလုံး ကြည့်မည် →' : 'View all notifications →'}</button>
+              <button onclick="Router.navigate('/shop/notifications');">${lang === 'mm' ? 'အကြောင်းကြားချက်အားလုံး ကြည့်မည် (S-20) →' : (lang === 'ja' ? 'すべての通知を表示 (S-20) →' : 'View all notifications (S-20) →')}</button>
             </div>
           </div>
         </div>
@@ -735,7 +843,8 @@ var Components = (() => {
     adminSidebar, adminHeader, toggleSidebar, closeSidebar,
     statusBadge, starRating, emptyState, skeleton, confirmModal,
     restaurantCard, pageHeader, dataTable, kpiCard, phoneInput,
-    handlePhoneInput, getRawPhoneNumber, validatePhoneNumber, handleHeaderSearch
+    handlePhoneInput, getRawPhoneNumber, validatePhoneNumber, handleHeaderSearch,
+    switchShopBranch, shopBranches
   };
 })();
 
@@ -770,5 +879,8 @@ function showToast(type, title, message) {
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.dropdown')) {
     document.querySelectorAll('.dropdown__menu.open').forEach(m => m.classList.remove('open'));
+  }
+  if (!e.target.closest('.sidebar-store-dropdown')) {
+    document.querySelectorAll('.sidebar-store-menu.open').forEach(m => m.classList.remove('open'));
   }
 });

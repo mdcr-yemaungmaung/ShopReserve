@@ -2469,12 +2469,19 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   }
   .s02-view-switcher {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    padding: 3px;
+    gap: 3px;
+  }
+  .s02-view-btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
   .s02-view-btn__label {
-    display: none;
-  }
-  .s02-view-btn__icon {
-    font-size: 16px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
   }
   .s02-date-nav {
     justify-content: center;
@@ -3501,6 +3508,110 @@ body.screen-s01-s02-theme .s02-modal__header,
     flex-direction: column !important;
     align-items: flex-start !important;
   }
+}
+
+/* ============================================================
+   UNIFIED DASHBOARD & LEDGER KPI CARDS (S-01 & S-02)
+   ============================================================ */
+.s01-kpi-grid,
+.s02-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 14px !important;
+  margin-bottom: 20px !important;
+}
+
+.s01-kpi-card,
+.s02-kpi-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  padding: 16px 18px !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(11, 18, 32, 0.04) !important;
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.s01-kpi-card:hover,
+.s02-kpi-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(11, 18, 32, 0.08) !important;
+}
+
+/* Primary / Total */
+.s01-kpi-card--primary,
+.s02-kpi-card--primary {
+  border-top: 3px solid #0F768E !important;
+}
+.s01-kpi-card--primary.active,
+.s02-kpi-card--primary.active {
+  border-color: #0F768E !important;
+  box-shadow: 0 0 0 2px rgba(15, 118, 142, 0.25), 0 4px 12px rgba(15, 118, 142, 0.12) !important;
+  background: #FAFCFD !important;
+}
+
+/* Success / Confirmed / Seated */
+.s01-kpi-card--success,
+.s02-kpi-card--success {
+  border-top: 3px solid #10B981 !important;
+}
+.s01-kpi-card--success.active,
+.s02-kpi-card--success.active {
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.12) !important;
+  background: #F9FEFB !important;
+}
+
+/* Warning / Pending / Action Required */
+.s01-kpi-card--warning,
+.s02-kpi-card--warning {
+  border-top: 3px solid #D97706 !important;
+}
+.s01-kpi-card--warning.active,
+.s02-kpi-card--warning.active {
+  border-color: #D97706 !important;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25), 0 4px 12px rgba(217, 119, 6, 0.12) !important;
+  background: #FFFCF5 !important;
+}
+
+/* Info / Checked-In */
+.s01-kpi-card--info,
+.s02-kpi-card--info {
+  border-top: 3px solid #3B82F6 !important;
+}
+.s01-kpi-card--info.active,
+.s02-kpi-card--info.active {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25), 0 4px 12px rgba(59, 130, 246, 0.12) !important;
+  background: #F8FAFF !important;
+}
+
+/* Neutral / Completed */
+.s01-kpi-card--neutral,
+.s02-kpi-card--neutral {
+  border-top: 3px solid #64748B !important;
+}
+.s01-kpi-card--neutral.active,
+.s02-kpi-card--neutral.active {
+  border-color: #64748B !important;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25), 0 4px 12px rgba(100, 116, 139, 0.12) !important;
+  background: #F8FAFC !important;
+}
+
+/* Error / Cancelled / No-show */
+.s01-kpi-card--error,
+.s02-kpi-card--error {
+  border-top: 3px solid #EF4444 !important;
+}
+.s01-kpi-card--error.active,
+.s02-kpi-card--error.active {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25), 0 4px 12px rgba(239, 68, 68, 0.12) !important;
+  background: #FFFDFD !important;
 }
 
 

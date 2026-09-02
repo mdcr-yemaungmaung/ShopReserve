@@ -156,6 +156,20 @@ const ScreenS03A = (() => {
           </p>
         </div>
 
+        ${b.undo_no_show ? `
+          <!-- Undo No-Show Audit Log -->
+          <div class="stitch-card" style="margin-bottom: 24px; background: #FEF3C7; border: 1px solid #FCD34D;">
+            <span class="stitch-label" style="color: #92400E; margin-bottom: 6px;">${lang === 'mm' ? 'No-Show အမှားပြင်ဆင်မှု မှတ်တမ်း' : 'UNDO NO-SHOW AUDIT RECORD'}</span>
+            <div style="font-size: 13px; color: #92400E; font-weight: 700; display:flex; align-items:center; gap:6px; margin-bottom: 4px;">
+              <span class="material-symbols-outlined" style="font-size: 18px;">history</span>
+              <span>${lang === 'mm' ? 'No-Show အား ပြန်လည်ပြင်ဆင်ခဲ့သည်' : 'Reverted from No-Show'} (${b.undo_no_show.at ? b.undo_no_show.at.split('T')[0] : '2026-07-20'})</span>
+            </div>
+            <div style="font-size: 12.5px; color: #78350F; font-style: italic; line-height: 1.4;">
+              "${b.undo_no_show.reason || ''}"
+            </div>
+          </div>
+        ` : ''}
+
         <!-- Footer Action Buttons (Status Dependent) -->
         <div style="display: flex; flex-direction: column; gap: 10px;">
           
@@ -188,9 +202,9 @@ const ScreenS03A = (() => {
                 <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
                 ${lang === 'mm' ? 'ပြင်ဆင်မည်' : 'Edit'}
               </button>
-              <button type="button" onclick="ScreenS03A.updateStatus('${b.id}', 'cancelled')" style="height: 44px; background: #ffdad6; color: #93000a; font-weight: 600; font-size: 13.5px; border-radius: 12px; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
-                <span class="material-symbols-outlined" style="font-size: 18px;">cancel</span>
-                ${lang === 'mm' ? 'ပယ်ဖျက်မည်' : 'Cancel'}
+              <button type="button" onclick="ScreenS03A.updateStatus('${b.id}', 'no_show')" style="height: 44px; background: #fce7f3; color: #9d174d; font-weight: 600; font-size: 13.5px; border-radius: 12px; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">person_off</span>
+                ${lang === 'mm' ? 'No-Show' : 'No-Show'}
               </button>
             </div>
           ` : ''}
@@ -209,8 +223,25 @@ const ScreenS03A = (() => {
             </div>
           ` : ''}
 
-          <!-- TERMINAL STATES (COMPLETED / CANCELLED / NO_SHOW) -->
-          ${(b.status === 'completed' || b.status === 'cancelled' || b.status === 'no_show') ? `
+          <!-- NO_SHOW STATE -->
+          ${b.status === 'no_show' ? `
+            <button type="button" onclick="ScreenS03A.openUndoNoShowModal('${b.id}')" class="stitch-register-btn" style="height: 48px; font-size: 14.5px; background: #D97706 !important; color: #ffffff !important;">
+              <span class="material-symbols-outlined" style="font-size: 20px;">undo</span>
+              ${lang === 'mm' ? 'No-Show အမှားပြင်ဆင်မည် (Undo No-Show)' : 'Undo No-Show'}
+            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button type="button" onclick="ScreenS03A.sendViber()" style="height: 44px; background: #fbead1; color: #D8902F; border: 1px solid #D8902F; font-weight: 600; font-size: 13.5px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">chat</span>
+                ${lang === 'mm' ? 'Viber ဖြင့် သတိပေးမည်' : 'Viber Notify'}
+              </button>
+              <button type="button" onclick="ScreenS03A.close()" style="height: 44px; background: #edeeef; color: #0F4C5C; font-weight: 600; font-size: 13.5px; border-radius: 12px; border: none; cursor: pointer;">
+                ${lang === 'mm' ? 'ပိတ်မည်' : 'Close'}
+              </button>
+            </div>
+          ` : ''}
+
+          <!-- COMPLETED / CANCELLED -->
+          ${(b.status === 'completed' || b.status === 'cancelled') ? `
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <button type="button" onclick="ScreenS03A.sendViber()" style="height: 44px; background: #fbead1; color: #D8902F; border: 1px solid #D8902F; font-weight: 600; font-size: 13.5px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
                 <span class="material-symbols-outlined" style="font-size: 18px;">chat</span>
@@ -508,6 +539,133 @@ const ScreenS03A = (() => {
     showToast('error', 'Enterprise Limit', I18n.t('s03_viber_paid_limitation'));
   }
 
+  let undoModalEl = null;
+
+  function openUndoNoShowModal(id) {
+    const queue = JSON.parse(localStorage.getItem('pending_bookings') || '[]');
+    const list = [...queue, ...MockData.shopReservations];
+    const b = list.find(r => r.id === id);
+    if (!b) return;
+
+    const lang = I18n.getLang();
+    closeUndoNoShowModal();
+
+    undoModalEl = document.createElement('div');
+    undoModalEl.id = 's03a-undo-modal';
+    undoModalEl.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 10000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+    `;
+
+    undoModalEl.innerHTML = `
+      <div class="card glass-card" style="width:100%; max-width:480px; border-radius:18px; position:relative; box-shadow:var(--shadow-xl); background:#FFFFFF; border:1px solid #E2E8F0; padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:#FEF3C7; color:#92400E; display:flex; align-items:center; justify-content:center; font-size:20px;">
+              ↩️
+            </div>
+            <div>
+              <h3 style="font-weight:700; color:#0F172A; font-size:16.5px; margin:0;">
+                ${I18n.t('undo_no_show_modal_title')}
+              </h3>
+              <div style="font-size:12px; color:#64748B; margin-top:2px;">
+                Booking #${b.id} • ${b.name} (${b.guests}p)
+              </div>
+            </div>
+          </div>
+          <button type="button" style="background:none; border:none; font-size:18px; cursor:pointer; color:#94A3B8;" onclick="ScreenS03A.closeUndoNoShowModal()">✕</button>
+        </div>
+
+        <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:10px 14px; font-size:12px; color:#92400E; line-height:1.45; margin-bottom:16px;">
+          ${I18n.t('undo_no_show_desc')}
+        </div>
+
+        <form onsubmit="ScreenS03A.submitUndoNoShow(event, '${b.id}')">
+          <div style="margin-bottom:14px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; color:#334155; margin-bottom:6px;">
+              ${I18n.t('undo_no_show_target_status')}
+            </label>
+            <select id="undo-target-status" style="width:100%; height:40px; border:1px solid #CBD5E1; border-radius:8px; padding:0 10px; font-size:13px; color:#0F172A; background:#F8FAFC; font-weight:600;">
+              <option value="confirmed">${lang === 'mm' ? 'အတည်ပြုပြီး (Confirmed)' : 'Confirmed'}</option>
+              <option value="checked_in">${lang === 'mm' ? 'ဆိုက်ရောက်ပြီး / ထိုင်ခုံချပြီး (Checked-In & Seated)' : 'Checked-In & Seated'}</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; color:#334155; margin-bottom:6px;">
+              ${I18n.t('undo_no_show_reason_label')} <span style="color:#EF4444;">*</span>
+            </label>
+            <textarea id="undo-reason" rows="3" required placeholder="${I18n.t('undo_no_show_reason_placeholder')}" style="width:100%; border:1px solid #CBD5E1; border-radius:8px; padding:8px 12px; font-size:13px; color:#0F172A; background:#F8FAFC; resize:none; outline:none;"></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" onclick="ScreenS03A.closeUndoNoShowModal()" class="btn btn-sm btn-secondary" style="height:38px; padding:0 16px; font-size:13px; font-weight:600; border-radius:8px;">
+              ${I18n.t('cancel')}
+            </button>
+            <button type="submit" class="btn btn-sm" style="height:38px; padding:0 18px; font-size:13px; font-weight:600; border-radius:8px; background:#D97706; border-color:#D97706; color:#FFFFFF;">
+              ${I18n.t('undo_no_show_confirm_btn')}
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(undoModalEl);
+  }
+
+  function closeUndoNoShowModal() {
+    if (undoModalEl) {
+      undoModalEl.remove();
+      undoModalEl = null;
+    }
+  }
+
+  function submitUndoNoShow(e, id) {
+    e.preventDefault();
+    const targetStatus = document.getElementById('undo-target-status')?.value || 'confirmed';
+    const reason = document.getElementById('undo-reason')?.value.trim();
+
+    if (!reason) {
+      showToast('error', 'Required Input', I18n.t('undo_no_show_error_reason'));
+      return;
+    }
+
+    const res = MockData.shopReservations.find(r => r.id === id);
+    if (res) {
+      res.status = targetStatus;
+      res.undo_no_show = {
+        at: new Date().toISOString(),
+        reason: reason,
+        by: 'Shop Staff'
+      };
+
+      showToast('success', 'No-Show Reverted', I18n.t('undo_no_show_success'));
+      closeUndoNoShowModal();
+
+      const updateCb = modalElement ? modalElement.onUpdateCallback : null;
+      if (updateCb) {
+        updateCb();
+      }
+
+      if (modalElement) {
+        open(id, updateCb);
+      } else {
+        render({ id });
+      }
+    }
+  }
+
   return { 
     render, 
     open, 
@@ -516,6 +674,9 @@ const ScreenS03A = (() => {
     saveEdit, 
     updateStatus, 
     updateTable, 
-    sendViber 
+    sendViber,
+    openUndoNoShowModal,
+    closeUndoNoShowModal,
+    submitUndoNoShow
   };
 })();

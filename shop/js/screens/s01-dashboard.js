@@ -474,70 +474,98 @@ const ScreenS01 = (() => {
                   const isCheckedIn = b.status === 'checked_in';
                   const isPending = b.status === 'pending';
                   const isCancelled = b.status === 'cancelled' || b.status === 'no_show';
-                  const statusBorderColor = isCheckedIn ? '#10B981' : isPending ? '#F59E0B' : isCancelled ? '#EF4444' : '#0F768E';
+                  const isCompleted = b.status === 'completed';
+                  const statusClass = isCheckedIn ? 'seated' : isPending ? 'pending' : isCancelled ? 'cancelled' : isCompleted ? 'completed' : 'confirmed';
 
                   return `
-                    <div class="s01-guest-card" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 10px; margin-bottom:6px; box-shadow:0 1px 2px rgba(11,18,32,0.03); border-left:3.5px solid ${statusBorderColor};">
-                      <!-- Row 1: Time, Pax, Table, Status & Compact Action -->
-                      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-                        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
-                          <span style="font-weight:800; font-size:12px; color:#0F768E; background:#F0F9FB; padding:1px 6px; border-radius:4px; border:1px solid #BAE6FD; white-space:nowrap;">
-                            ${formatTime12h(b.time)}
-                          </span>
-                          <span style="font-weight:700; font-size:11px; color:#475569; background:#F1F5F9; padding:1px 5px; border-radius:4px; white-space:nowrap;">
-                            👥 ${b.guests || 2}p
-                          </span>
-                          <span style="background:#E0F2FE; color:#0369A1; font-weight:700; font-size:11px; padding:1px 6px; border-radius:4px; border:1px solid #BAE6FD; white-space:nowrap;">
-                            🪑 ${b.table || 'Auto'}
-                          </span>
+                    <div class="s01-booking-card booking-card s01-booking-card--${statusClass}" onclick="ScreenS01.openBookingDetail('${b.id}')">
+                      <!-- Top Meta Strip: Time, Table, Status -->
+                      <div class="s01-card__header">
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                          <div class="s01-card__time-badge">
+                            <span style="font-size:12px;">⏰</span>
+                            <span>${formatTime12h(b.time)}</span>
+                          </div>
+                          <div class="s01-card__table-badge">
+                            <span style="font-size:12px;">🪑</span>
+                            <span>${b.table ? `Table ${b.table}` : 'Auto Table'}</span>
+                          </div>
                         </div>
-                        <div style="flex-shrink:0;">
+                        <div class="s01-card__status-wrap">
                           ${Components.statusBadge(b.status)}
                         </div>
                       </div>
 
-                      <!-- Row 2: Guest Name & Phone/Notes with Right Action -->
-                      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:6px; padding-top:6px; border-top:1px dashed #F1F5F9;">
-                        <div style="flex:1; min-width:0;">
-                          <div style="display:flex; align-items:center; gap:5px;">
-                            <span style="font-weight:700; font-size:13px; color:#0B1220; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" onclick="ScreenS01.openBookingDetail('${b.id}')">
-                              ${b.name}
-                            </span>
-                            ${!b.user_id ? '<span class="badge badge--warning" style="font-size:9px; padding:0 4px;">Guest</span>' : ''}
+                      <!-- Main Guest & Context Details -->
+                      <div class="s01-card__body">
+                        <div class="s01-card__guest-row">
+                          <div class="s01-card__guest-main">
+                            <div class="s01-card__guest-name">${b.name}</div>
+                            ${!b.user_id ? '<span class="s01-card__walkin-tag">Guest</span>' : '<span class="s01-card__member-tag">Registered</span>'}
                           </div>
-                          <div style="display:flex; align-items:center; gap:6px; margin-top:2px; font-size:11px; color:#64748B;">
-                            ${b.phone ? `
-                              <a href="tel:${b.phone}" style="color:#0F768E; font-weight:600; text-decoration:none; white-space:nowrap;" onclick="event.stopPropagation();">
-                                📞 ${b.phone}
-                              </a>
-                            ` : `<span style="color:#94A3B8;">No phone</span>`}
-                            ${b.notes ? `
-                              <span style="color:#B45309; background:#FEF3C7; border:1px solid #FDE68A; border-radius:3px; padding:0 4px; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px;">
-                                📝 ${b.notes}
-                              </span>
-                            ` : ''}
+                          <div class="s01-card__pax-pill">
+                            <span>👥</span>
+                            <strong>${b.guests || 2}</strong>
+                            <span>Guests</span>
                           </div>
                         </div>
 
-                        <!-- Compact Action Button Group -->
-                        <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                        <!-- Phone Contact & Details -->
+                        <div class="s01-card__contact-row">
+                          ${b.phone ? `
+                            <a href="tel:${b.phone}" class="s01-card__phone-link" onclick="event.stopPropagation();" title="Call Guest">
+                              <span>📞</span>
+                              <span>${b.phone}</span>
+                            </a>
+                          ` : `<span class="s01-card__no-contact">No phone registered</span>`}
+                        </div>
+
+                        <!-- High Visibility Alert for Special Requests / Notes -->
+                        ${b.notes ? `
+                          <div class="s01-card__special-alert" onclick="event.stopPropagation();">
+                            <span class="s01-card__alert-icon">⚠️</span>
+                            <div class="s01-card__alert-content">
+                              <strong>Special Request:</strong> ${b.notes}
+                            </div>
+                          </div>
+                        ` : ''}
+                      </div>
+
+                      <!-- Ergonomic Touch-Optimized Actions Footer -->
+                      <div class="s01-card__footer" onclick="event.stopPropagation();">
+                        <div style="flex:1; display:flex; gap:6px;">
                           ${b.status === 'confirmed' ? `
-                            <button class="btn btn-sm btn-primary" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'checked_in')" style="height:28px; padding:0 8px; font-size:11px; font-weight:700; background:#10B981; border-color:#10B981; color:white; border-radius:6px; white-space:nowrap;">
-                              🪑 Seat
+                            <button class="s01-card__action-btn s01-card__action-btn--seat" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'checked_in')">
+                              <span>🪑</span>
+                              <span>Seat Guest Now</span>
                             </button>
                           ` : b.status === 'checked_in' ? `
-                            <button class="btn btn-sm btn-secondary" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'completed')" style="height:28px; padding:0 8px; font-size:11px; font-weight:700; border-radius:6px; white-space:nowrap;">
-                              ✅ Done
+                            <button class="s01-card__action-btn s01-card__action-btn--complete" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'completed')">
+                              <span>✅</span>
+                              <span>Complete & Free Table</span>
                             </button>
                           ` : b.status === 'pending' ? `
-                            <button class="btn btn-sm btn-primary" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'confirmed')" style="height:28px; padding:0 8px; font-size:11px; font-weight:700; background:#0F768E; border-color:#0F768E; border-radius:6px; white-space:nowrap;">
-                              ✓ Confirm
+                            <button class="s01-card__action-btn s01-card__action-btn--confirm" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'confirmed')">
+                              <span>✓</span>
+                              <span>Confirm Reservation</span>
                             </button>
-                          ` : ''}
-                          <button class="btn btn-sm btn-outline" onclick="ScreenS01.openBookingDetail('${b.id}')" style="height:28px; padding:0 8px; font-size:11px; font-weight:600; border-radius:6px; color:#475569; border-color:#CBD5E1; background:#FFFFFF; white-space:nowrap;">
-                            Info
-                          </button>
+                          ` : isCancelled ? `
+                            <button class="s01-card__action-btn s01-card__action-btn--reinstate" onclick="ScreenS01.quickUpdateStatus('${b.id}', 'confirmed')">
+                              <span>↺</span>
+                              <span>Reinstate</span>
+                            </button>
+                          ` : `
+                            <button class="s01-card__action-btn s01-card__action-btn--view" onclick="ScreenS01.openBookingDetail('${b.id}')">
+                              <span>📋</span>
+                              <span>View Booking Summary</span>
+                            </button>
+                          `}
                         </div>
+
+                        <button class="s01-card__detail-btn" onclick="ScreenS01.openBookingDetail('${b.id}')" title="View Full Details">
+                          <span>Details</span>
+                          <span>→</span>
+                        </button>
                       </div>
                     </div>
                   `;

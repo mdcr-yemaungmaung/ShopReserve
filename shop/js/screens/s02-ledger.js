@@ -94,14 +94,18 @@ const ScreenS02 = (() => {
 
   function getStatusCounts() {
     const list = getAllReservations();
+    const totalGuests = list.reduce((sum, r) => sum + (parseInt(r.guests, 10) || 0), 0);
+    const pendingGuests = list.filter(r => r.status === 'pending' && (!r.user_id || r.user_id === 'null')).length;
     return {
       total: list.length,
+      totalGuests: totalGuests,
       confirmed: list.filter(r => r.status === 'confirmed').length,
       pending: list.filter(r => r.status === 'pending').length,
       checked_in: list.filter(r => r.status === 'checked_in').length,
       completed: list.filter(r => r.status === 'completed').length,
       cancelled: list.filter(r => r.status === 'cancelled').length,
       no_show: list.filter(r => r.status === 'no_show').length,
+      pendingGuestCallbacks: pendingGuests
     };
   }
 
@@ -250,44 +254,124 @@ const ScreenS02 = (() => {
       ? `<span class="badge badge--warning" style="font-size:11px; padding:3px 8px;">⚡ Offline</span>`
       : `<span class="badge badge--success" style="font-size:11px; padding:3px 8px;">● Online</span>`;
 
+    const lang = I18n.getLang();
+
     return `
-      <div class="s02-header">
-        <div class="s02-header__top">
+      <div class="s02-header" style="margin-bottom: 20px;">
+        <div class="s02-header__top" style="margin-bottom: 16px;">
           <div>
             <h1 class="s02-header__title">${I18n.t('booking_ledger')}</h1>
             <p class="s02-header__subtitle">${I18n.t('ledger_subtitle')}</p>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             ${isOfflineBadge}
-            <button class="btn btn-sm btn-ghost" onclick="ScreenS02.toggleNetwork()" title="Toggle Network">
+            <button class="btn btn-sm btn-ghost" onclick="ScreenS02.toggleNetwork()" title="Toggle Network" style="height:36px; padding:0 10px; border-radius:8px; border:1px solid #E2E8F0;">
               🔄
             </button>
           </div>
         </div>
-        <div class="s02-kpi-row">
-          <div class="s02-kpi ${statusFilter === 'all' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('all')" style="cursor:pointer;" title="Filter by All Statuses">
-            <div class="s02-kpi__value">${counts.total}</div>
-            <div class="s02-kpi__label">${I18n.t('total')}</div>
+
+        <div class="s02-kpi-grid">
+          <!-- 1. All Bookings Card -->
+          <div class="s02-kpi-card s02-kpi-card--primary ${statusFilter === 'all' ? 'active' : ''}" onclick="ScreenS02.setStatusFilter('all')" title="Filter by All Reservations">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
+                  ${lang === 'mm' ? 'ဘွတ်ကင် စုစုပေါင်း' : 'Total Bookings'}
+                </span>
+                <div style="font-size:24px; font-weight:800; color:#0F768E; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
+                  ${counts.total} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Total'}</span>
+                </div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:8px; background:rgba(15,118,142,0.1); color:#0F768E; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                ${Components.icon('calendar', 17)}
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              👥 ${lang === 'mm' ? 'ဧည့်သည် စုစုပေါင်း' : 'Total Expected'}: <strong>${counts.totalGuests} ${lang === 'mm' ? 'ဦး' : 'Guests'}</strong>
+            </div>
           </div>
-          <div class="s02-kpi s02-kpi--confirmed ${statusFilter === 'confirmed' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('confirmed')" style="cursor:pointer;" title="Filter by Confirmed">
-            <div class="s02-kpi__value">${counts.confirmed}</div>
-            <div class="s02-kpi__label">${I18n.t('status_confirmed')}</div>
+
+          <!-- 2. Confirmed & Seated Card -->
+          <div class="s02-kpi-card s02-kpi-card--success ${statusFilter === 'confirmed' ? 'active' : ''}" onclick="ScreenS02.setStatusFilter('confirmed')" title="Filter by Confirmed">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
+                  ${lang === 'mm' ? 'အတည်ပြုပြီး / ထိုင်ခုံချ' : 'Confirmed & Seated'}
+                </span>
+                <div style="font-size:24px; font-weight:800; color:#10B981; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
+                  ${counts.confirmed + counts.checked_in} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Active'}</span>
+                </div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:8px; background:rgba(16,185,129,0.1); color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                ${Components.icon('check', 17)}
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              🪑 <strong>${counts.checked_in}</strong> ${lang === 'mm' ? 'ထိုင်ခုံချပြီး' : 'Seated'} • <strong>${counts.confirmed}</strong> ${lang === 'mm' ? 'အတည်ပြုပြီး' : 'Confirmed'}
+            </div>
           </div>
-          <div class="s02-kpi s02-kpi--pending ${statusFilter === 'pending' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('pending')" style="cursor:pointer;" title="Filter by Pending">
-            <div class="s02-kpi__value">${counts.pending}</div>
-            <div class="s02-kpi__label">${I18n.t('status_pending')}</div>
+
+          <!-- 3. Action Required (Pending) Card -->
+          <div class="s02-kpi-card s02-kpi-card--warning ${statusFilter === 'pending' ? 'active' : ''}" onclick="ScreenS02.setStatusFilter('pending')" title="Filter by Action Required">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
+                  ${lang === 'mm' ? 'လုပ်ဆောင်ရန် လိုအပ်' : 'Action Required'}
+                </span>
+                <div style="font-size:24px; font-weight:800; color:#D97706; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
+                  ${counts.pending} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'စောင့်ဆိုင်းဆဲ' : 'Pending'}</span>
+                </div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:8px; background:rgba(245,158,11,0.1); color:#D97706; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                ${Components.icon('clock', 17)}
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${counts.pendingGuestCallbacks > 0 
+                ? `📞 <strong>${counts.pendingGuestCallbacks}</strong> ${lang === 'mm' ? 'ဖုန်းဆက်ရန် လိုအပ်' : 'Phone Callbacks'}` 
+                : (lang === 'mm' ? 'အတည်ပြုချက် စောင့်ဆိုင်းနေသည်' : 'Awaiting Merchant Approval')}
+            </div>
           </div>
-          <div class="s02-kpi s02-kpi--checked-in ${statusFilter === 'checked_in' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('checked_in')" style="cursor:pointer;" title="Filter by Checked In">
-            <div class="s02-kpi__value">${counts.checked_in}</div>
-            <div class="s02-kpi__label">${I18n.t('status_checked_in')}</div>
+
+          <!-- 4. Completed Dining Card -->
+          <div class="s02-kpi-card s02-kpi-card--neutral ${statusFilter === 'completed' ? 'active' : ''}" onclick="ScreenS02.setStatusFilter('completed')" title="Filter by Completed">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
+                  ${lang === 'mm' ? 'ပြီးစီးပြီး' : 'Completed'}
+                </span>
+                <div style="font-size:24px; font-weight:800; color:#475569; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
+                  ${counts.completed} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ပြီးစီး' : 'Finished'}</span>
+                </div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:8px; background:rgba(100,116,139,0.12); color:#475569; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                ${Components.icon('userCheck', 17)}
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ✓ ${lang === 'mm' ? 'ပြီးစီးခဲ့သော ဘွတ်ကင်များ' : 'Finished Dining Services'}
+            </div>
           </div>
-          <div class="s02-kpi s02-kpi--completed ${statusFilter === 'completed' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('completed')" style="cursor:pointer;" title="Filter by Completed">
-            <div class="s02-kpi__value">${counts.completed}</div>
-            <div class="s02-kpi__label">${I18n.t('status_completed')}</div>
-          </div>
-          <div class="s02-kpi s02-kpi--cancelled ${statusFilter === 'cancelled' ? 's02-kpi--active' : ''}" onclick="ScreenS02.setStatusFilter('cancelled')" style="cursor:pointer;" title="Filter by Cancelled / No-Show">
-            <div class="s02-kpi__value">${counts.cancelled + counts.no_show}</div>
-            <div class="s02-kpi__label">${I18n.t('cancelled_no_show')}</div>
+
+          <!-- 5. Cancellations / No-Show Card -->
+          <div class="s02-kpi-card s02-kpi-card--error ${statusFilter === 'cancelled' ? 'active' : ''}" onclick="ScreenS02.setStatusFilter('cancelled')" title="Filter by Cancelled / No-Show">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
+                  ${lang === 'mm' ? 'ပယ်ဖျက် / မလာရောက်' : 'Cancellations / No-Show'}
+                </span>
+                <div style="font-size:24px; font-weight:800; color:#EF4444; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
+                  ${counts.cancelled + counts.no_show} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Total'}</span>
+                </div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:8px; background:rgba(239,68,68,0.1); color:#EF4444; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                ${Components.icon('alertCircle', 17)}
+              </div>
+            </div>
+            <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              🚫 <strong>${counts.cancelled}</strong> ${lang === 'mm' ? 'ပယ်ဖျက်' : 'Cancelled'} • <strong>${counts.no_show}</strong> ${lang === 'mm' ? 'မလာရောက်' : 'No-Show'}
+            </div>
           </div>
         </div>
       </div>
@@ -299,10 +383,10 @@ const ScreenS02 = (() => {
   // ============================================================
   function renderViewToolbar() {
     const views = [
-      { id: 'day', label: I18n.t('day_view'), icon: '📅' },
-      { id: 'week', label: I18n.t('week_view'), icon: '📆' },
-      { id: 'month', label: I18n.t('month_view'), icon: '🗓️' },
-      { id: 'list', label: I18n.t('list_view'), icon: '📋' },
+      { id: 'day', label: I18n.t('day_view') },
+      { id: 'week', label: I18n.t('week_view') },
+      { id: 'month', label: I18n.t('month_view') },
+      { id: 'list', label: I18n.t('list_view') },
     ];
 
     return `
@@ -312,7 +396,6 @@ const ScreenS02 = (() => {
             ${views.map(v => `
               <button class="s02-view-btn ${activeView === v.id ? 'active' : ''}"
                 onclick="ScreenS02.setView('${v.id}')">
-                <span class="s02-view-btn__icon">${v.icon}</span>
                 <span class="s02-view-btn__label">${v.label}</span>
               </button>
             `).join('')}
@@ -465,6 +548,12 @@ const ScreenS02 = (() => {
           ✓ Complete
         </button>
       `;
+    } else if (b.status === 'no_show') {
+      actionBtns = `
+        <button class="s02-action-btn" style="background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; font-weight:600;" onclick="event.stopPropagation(); ScreenS02.openUndoNoShowModal('${b.id}')" title="Undo No-show">
+          ↩️ ${I18n.t('undo_no_show')}
+        </button>
+      `;
     }
 
     return `
@@ -491,7 +580,7 @@ const ScreenS02 = (() => {
             ${I18n.t('status_' + b.status) || b.status}
           </span>
 
-          ${isNonMember ? `<span class="s02-phone-badge" title="Requires call confirmation">📞 ${I18n.t('phone_followup_badge')}</span>` : ''}
+          ${(isNonMember && b.status === 'pending') ? `<span class="s02-phone-badge" title="Requires call confirmation">${I18n.t('phone_followup_badge')}</span>` : ''}
           ${isPendingSync ? `<span class="s02-pending-sync-badge" title="Pending sync">🔄 Pending Sync</span>` : ''}
           ${hasConflict ? `<span class="s02-conflict-badge" title="Sync conflict">⚠️ Conflict</span>` : ''}
         </div>
@@ -713,6 +802,10 @@ const ScreenS02 = (() => {
                   onclick="ScreenS02.updateStatus('${b.id}', 'checked_in')">Check-in</button>
                 <button class="btn btn-sm" style="padding:3px 8px; font-size:11px; color:#991b1b;"
                   onclick="ScreenS02.updateStatus('${b.id}', 'no_show')">No-show</button>
+              ` : ''}
+              ${b.status === 'no_show' ? `
+                <button class="btn btn-sm" style="padding:3px 8px; font-size:11px; background:#fef3c7; color:#92400e; border:1px solid #fcd34d; font-weight:600;"
+                  onclick="ScreenS02.openUndoNoShowModal('${b.id}')">↩️ ${I18n.t('undo_no_show')}</button>
               ` : ''}
               ${b.status === 'pending' ? `
                 <button class="btn btn-sm" style="padding:3px 8px; font-size:11px; background:#dcfce7; color:#166534;"
@@ -942,6 +1035,12 @@ const ScreenS02 = (() => {
     }
   }
 
+  function openUndoNoShowModal(id) {
+    if (typeof ScreenS03A !== 'undefined') {
+      ScreenS03A.openUndoNoShowModal(id);
+    }
+  }
+
   function openNewBookingModal() {
     if (typeof ScreenS03B !== 'undefined') {
       ScreenS03B.open(() => render());
@@ -1024,6 +1123,7 @@ const ScreenS02 = (() => {
     toggleConflictDetail,
     resolveConflict,
     openBookingDetail,
+    openUndoNoShowModal,
     openNewBookingModal,
     openPdfModal,
     closePdfModal,
