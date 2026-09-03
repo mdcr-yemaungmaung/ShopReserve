@@ -390,33 +390,225 @@ button:active:not(:disabled),
 
 
 .stitch-card {
-  background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%);
+  background: #ffffff;
   border-radius: 16px;
-  padding: 16px;
-  border: 1px solid rgba(15, 76, 92, 0.12);
-  box-shadow: 0 2px 6px rgba(15, 76, 92, 0.03);
+  padding: 18px 20px;
+  border: 1px solid rgba(15, 76, 92, 0.15);
+  box-shadow: 0 2px 8px rgba(15, 76, 92, 0.05);
   margin-bottom: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-@media (max-width: 1024px) {
+.stitch-card:hover {
+  border-color: rgba(15, 76, 92, 0.25);
+}
+
+.stitch-summary-card {
+  background: linear-gradient(145deg, #FFFFFF 0%, #F4F8FA 100%);
+  border: 1.5px solid rgba(15,76,92,0.2);
+  box-shadow: 0 4px 14px rgba(15, 76, 92, 0.08);
+}
+
+.stitch-simulator-card {
+  background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%);
+  border: 1px solid rgba(15,76,92,0.12);
+  box-shadow: 0 2px 6px rgba(15,76,92,0.03);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+/* Tablet View (768px - 1024px): Retain Segmented Cards */
+@media (min-width: 768px) and (max-width: 1024px) {
   #s09-screen .stitch-card,
-  #s09-form .stitch-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    margin-bottom: 24px !important;
+  #s09-form .stitch-card,
+  #s03b-screen .stitch-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 76, 92, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(15, 76, 92, 0.05) !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
   }
 
   #s09-screen #s09-calendar-wrapper > div,
   #s09-screen .s09-month-calendar-box {
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 76, 92, 0.12) !important;
+    box-shadow: 0 1px 4px rgba(15, 76, 92, 0.03) !important;
+    border-radius: 14px !important;
+    padding: 12px !important;
+  }
+}
+
+/* Mobile View (< 768px): Borderless Sections with Subtle Hairline Dividers (1px solid #E2E8F0) & No Floating Buttons */
+@media (max-width: 767px) {
+  #s09-screen .stitch-card,
+  #s09-form .stitch-card {
     background: transparent !important;
     border: none !important;
+    border-bottom: 1px solid #E2E8F0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 6px 0 !important;
+    padding: 0 0 22px 0 !important;
+    margin-bottom: 22px !important;
   }
+
+  /* Remove bottom divider from the last card in the column */
+  #s09-screen .stitch-desktop-sticky-summary > .stitch-card:last-of-type,
+  #s09-form .stitch-desktop-sticky-summary > .stitch-card:last-of-type {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Cleaner card headers on mobile without redundant inner line */
+  #s09-screen .stitch-card-header {
+    border-bottom: none !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* Calendar in mobile view: full-width and clean light border */
+  #s09-screen #s09-calendar-wrapper > div,
+  #s09-screen .s09-month-calendar-box {
+    background: #ffffff !important;
+    border: 1px solid #E2E8F0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+  }
+
+  /* Summary Card on mobile: Clean, light container directly preceding in-flow submit CTA */
+  #s09-screen .stitch-summary-card {
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+
+  /* Network simulator card on mobile */
+  #s09-screen .stitch-simulator-card {
+    border-radius: 12px !important;
+    padding: 12px !important;
+    border: 1px solid #E2E8F0 !important;
+    background: #F8FAFC !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Card Header for Option A Segmented Cards */
+.stitch-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(15, 76, 92, 0.1);
+  flex-wrap: wrap;
+}
+
+.stitch-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stitch-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(15, 76, 92, 0.08);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.stitch-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F4C5C;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.stitch-card-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0F4C5C;
+  background: rgba(15, 76, 92, 0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Quick guest pill buttons */
+.stitch-guest-chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stitch-guest-chip {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.stitch-guest-chip:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.stitch-guest-chip.active {
+  background: #0F4C5C !important;
+  border-color: #0F4C5C !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(15, 76, 92, 0.25);
+}
+
+/* Quick occasion and special request chips */
+.stitch-request-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(15, 76, 92, 0.2);
+  background: #F4F8FA;
+  color: #0F4C5C;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stitch-request-chip:hover {
+  background: #E6EFF2;
+  border-color: #0F4C5C;
+  transform: translateY(-1px);
+}
+
+.stitch-request-chip:active {
+  transform: scale(0.96);
 }
 
 .stitch-label {

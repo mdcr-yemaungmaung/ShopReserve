@@ -101,8 +101,29 @@ const ScreenS04 = (() => {
     // ==========================================
     const hourRows = list.map((item, idx) => {
       const dayLabel = I18n.t(item.day);
+      
+      // Calculate row-specific validation error
+      let rowErrors = [];
+      if (item.isOpen) {
+        if (item.open >= item.close) {
+          rowErrors.push(I18n.t('s04_row_error_open_close'));
+        }
+        if (item.lastOrder && (item.lastOrder < item.open || item.lastOrder > item.close)) {
+          rowErrors.push(I18n.t('s04_row_error_lo'));
+        }
+        if (item.hasSecondShift) {
+          if (item.secondOpen >= item.secondClose) {
+            rowErrors.push(I18n.t('s04_row_error_shift2'));
+          }
+          if (item.secondLastOrder && (item.secondLastOrder < item.secondOpen || item.secondLastOrder > item.secondClose)) {
+            rowErrors.push(I18n.t('s04_row_error_shift2_lo'));
+          }
+        }
+      }
+      const hasRowError = rowErrors.length > 0;
+
       return `
-        <div class="flex flex-col border-bottom py-3" style="border-bottom:1px solid rgba(15,76,92,0.12); padding:14px 8px; transition:background 0.15s; border-radius:8px;">
+        <div class="flex flex-col border-bottom py-3 ${hasRowError ? 'bg-error-container-low' : ''}" style="border-bottom:1px solid rgba(15,76,92,0.12); padding:14px 8px; transition:background 0.15s; border-radius:8px; ${hasRowError ? 'border-left:3px solid var(--color-error); background:rgba(186,26,26,0.04);' : ''}">
           <div class="availability-row flex items-center justify-between flex-wrap gap-3">
             <div style="min-width:130px; display:flex; flex-direction:column; gap:4px;">
               <span style="font-weight:700; color:var(--color-primary); font-size:15px; font-family:'Outfit', sans-serif;">${dayLabel}</span>
@@ -120,19 +141,22 @@ const ScreenS04 = (() => {
             <!-- Shift 1 Inputs -->
             <div class="availability-time-group flex items-center gap-3 flex-wrap">
               <div class="flex items-center gap-2">
-                <input type="time" class="form-input" id="open-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.open}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'open', this.value)">
+                <input type="time" class="form-input" id="open-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.isOpen && item.open >= item.close ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.open}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'open', this.value)">
                 <span style="font-size:13px; font-weight:600; color:#46464f;">to</span>
-                <input type="time" class="form-input" id="close-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.close}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'close', this.value)">
+                <input type="time" class="form-input" id="close-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.isOpen && item.open >= item.close ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.close}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'close', this.value)">
               </div>
               <div class="flex items-center gap-1.5">
                 <span style="color:#0F4C5C; font-size:12px; font-weight:700;">LO:</span>
-                <input type="time" class="form-input" id="lo-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.lastOrder}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'lastOrder', this.value)" title="Last Order">
+                <input type="time" class="form-input" id="lo-${idx}" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.isOpen && item.lastOrder && (item.lastOrder < item.open || item.lastOrder > item.close) ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.lastOrder}" ${item.isOpen && !isStaff ? '' : 'disabled'} onchange="ScreenS04.updateTime(${idx}, 'lastOrder', this.value)" title="Last Order">
               </div>
             </div>
 
-            <!-- Toggles and splits -->
-            <div class="flex items-center gap-3">
+            <!-- Toggles, copy button and splits -->
+            <div class="flex items-center gap-2.5">
               ${item.isOpen && !isStaff ? `
+                <button class="btn btn-ghost btn-sm" onclick="ScreenS04.openCopyModal(${idx})" title="Copy ${dayLabel}'s hours to other days" style="padding:6px 10px; font-size:12px; font-weight:600; color:#0F4C5C; background:#f4f8fa; border:1px solid rgba(15,76,92,0.15); border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                  📋 ${I18n.t('copy') || 'Copy'}
+                </button>
                 <button class="btn btn-ghost btn-sm" onclick="ScreenS04.toggleSecondShift(${idx})" style="padding:6px 10px; font-size:12px; font-weight:600; color:#0F4C5C; background:#f4f8fa; border:1px solid rgba(15,76,92,0.15); border-radius:6px;">
                   ${item.hasSecondShift ? '✕ Remove Split' : '➕ Split Shift'}
                 </button>
@@ -152,16 +176,23 @@ const ScreenS04 = (() => {
               </div>
               <div class="availability-time-group flex items-center gap-3" style="flex:1;">
                 <div class="flex items-center gap-2">
-                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.secondOpen}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondOpen', this.value)">
+                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.secondOpen >= item.secondClose ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.secondOpen}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondOpen', this.value)">
                   <span style="font-size:13px; font-weight:600; color:#46464f;">to</span>
-                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.secondClose}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondClose', this.value)">
+                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.secondOpen >= item.secondClose ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.secondClose}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondClose', this.value)">
                 </div>
                 <div class="flex items-center gap-1.5">
                   <span style="color:#0F4C5C; font-size:12px; font-weight:700;">LO:</span>
-                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid rgba(15,76,92,0.25); text-align:center; padding:0 8px;" value="${item.secondLastOrder}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondLastOrder', this.value)">
+                  <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.secondLastOrder && (item.secondLastOrder < item.secondOpen || item.secondLastOrder > item.secondClose) ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.secondLastOrder}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondLastOrder', this.value)">
                 </div>
               </div>
               <div style="font-size:11.5px; color:#777680; font-style:italic;">* Mid-day break or post-midnight hours</div>
+            </div>
+          ` : ''}
+
+          <!-- Inline row validation error message -->
+          ${hasRowError ? `
+            <div style="font-size:11.5px; color:var(--color-error); margin-top:6px; font-weight:600; display:flex; align-items:center; gap:4px; padding-left:4px;">
+              ⚠️ ${rowErrors.join(' • ')}
             </div>
           ` : ''}
         </div>
@@ -390,7 +421,7 @@ const ScreenS04 = (() => {
         
         <!-- Section 1: Business Hours -->
         <section class="card flex flex-col gap-4">
-          <div class="flex justify-between items-center" style="border-bottom:1px solid var(--color-surface-container); padding-bottom:8px;">
+          <div class="flex justify-between items-center flex-wrap gap-2" style="border-bottom:1px solid var(--color-surface-container); padding-bottom:8px;">
             <div>
               <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); margin:0;">
                 Regular Weekly Business Hours
@@ -399,7 +430,14 @@ const ScreenS04 = (() => {
                 Define open/close times, last orders, and optional mid-day breaks for each day of the week.
               </div>
             </div>
-            <span style="font-size:11px; color:var(--color-outline);">* LO = Last Order Time</span>
+            <div class="flex items-center gap-3">
+              <span style="font-size:11px; color:var(--color-outline);">* LO = Last Order Time</span>
+              ${isStaff ? '' : `
+                <button class="btn btn-secondary btn-sm" onclick="ScreenS04.openCopyModal(0)" style="font-size:12px; font-weight:600; padding:5px 12px; display:inline-flex; align-items:center; gap:6px;">
+                  ${Components.icon('copy', 14) || '📋'} ${I18n.t('s04_copy_hours_btn')}
+                </button>
+              `}
+            </div>
           </div>
           
           ${timeValidationAlertHtml}
@@ -490,6 +528,206 @@ const ScreenS04 = (() => {
     if (key === 'bookingCutoffMin') bookingCutoffMin = Math.max(0, num || 60);
     if (key === 'minPartySize') minPartySize = Math.max(1, num || 1);
     if (key === 'maxPartySize') maxPartySize = Math.max(minPartySize, num || 10);
+    render();
+  }
+
+  // ==========================================
+  // Copy Hours Modal & Logic (P1 UX Enhancement)
+  // ==========================================
+  function openCopyModal(defaultSourceIdx = 0) {
+    const sourceIdx = Math.max(0, Math.min(list.length - 1, defaultSourceIdx));
+    const sourceItem = list[sourceIdx];
+
+    const modalHtml = `
+      <div class="modal-backdrop" id="copy-hours-modal" onclick="if(event.target===this)this.remove()">
+        <div class="modal animate-scale-in" style="max-width:520px;">
+          <div class="modal__header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:18px;">📋</span>
+              <h3 class="modal__title">${I18n.t('s04_copy_modal_title')}</h3>
+            </div>
+            <button class="modal__close" onclick="document.getElementById('copy-hours-modal').remove()">✕</button>
+          </div>
+
+          <div class="modal__body flex flex-col gap-4">
+            <div style="font-size:12.5px; color:var(--color-outline); line-height:1.4;">
+              ${I18n.t('s04_copy_modal_desc')}
+            </div>
+
+            <!-- Source Day Selection -->
+            <div class="form-group mb-0">
+              <label class="form-label" style="font-weight:700; font-size:12px; color:var(--color-primary);">
+                ${I18n.t('s04_copy_source_label')}
+              </label>
+              <select class="form-input" id="copy-source-select" style="font-size:13px; font-weight:600; height:38px;" onchange="ScreenS04.onCopySourceChange(this.value)">
+                ${list.map((d, idx) => `
+                  <option value="${idx}" ${idx === sourceIdx ? 'selected' : ''}>
+                    ${I18n.t(d.day)} (${d.isOpen ? `${d.open} - ${d.close} | LO: ${d.lastOrder}${d.hasSecondShift ? ` + Shift 2: ${d.secondOpen}-${d.secondClose}` : ''}` : 'Closed'})
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+
+            <!-- Source Preview Card -->
+            <div id="copy-source-preview" class="p-3 bg-surface-container-low" style="border-radius:8px; border:1px solid rgba(15,76,92,0.15); font-size:12px;">
+              <div style="font-weight:700; color:#0F4C5C; margin-bottom:4px;">
+                ⏰ Operating Schedule to Apply:
+              </div>
+              <div id="copy-source-details" style="font-size:12.5px; color:#1a1c1e;">
+                ${sourceItem.isOpen ? `
+                  <span><strong>Shift 1:</strong> ${sourceItem.open} - ${sourceItem.close} (LO: ${sourceItem.lastOrder})</span>
+                  ${sourceItem.hasSecondShift ? `<br><span style="color:#777680;"><strong>Shift 2:</strong> ${sourceItem.secondOpen} - ${sourceItem.secondClose} (LO: ${sourceItem.secondLastOrder})</span>` : ''}
+                ` : '<span style="color:#777680; font-style:italic;">Closed (Sets target days to Closed status)</span>'}
+              </div>
+            </div>
+
+            <!-- Target Days Selection -->
+            <div class="form-group mb-0">
+              <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+                <label class="form-label mb-0" style="font-weight:700; font-size:12px; color:var(--color-primary);">
+                  ${I18n.t('s04_copy_target_label')}
+                </label>
+                <!-- Quick Selection Buttons -->
+                <div class="flex gap-1.5 flex-wrap">
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="ScreenS04.selectCopyTargets('weekdays')" style="font-size:11px; padding:3px 8px; background:var(--color-surface-container); border-radius:4px;">
+                    ${I18n.t('s04_copy_quick_weekdays')}
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="ScreenS04.selectCopyTargets('all')" style="font-size:11px; padding:3px 8px; background:var(--color-surface-container); border-radius:4px;">
+                    ${I18n.t('s04_copy_quick_all')}
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="ScreenS04.selectCopyTargets('weekends')" style="font-size:11px; padding:3px 8px; background:var(--color-surface-container); border-radius:4px;">
+                    ${I18n.t('s04_copy_quick_weekends')}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Day Checkboxes -->
+              <div class="grid grid-2 gap-2" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));">
+                ${list.map((d, idx) => {
+                  const isSource = idx === sourceIdx;
+                  // By default for weekdays, check if it's not the source
+                  const isWeekday = idx >= 0 && idx <= 4;
+                  const defaultChecked = !isSource && isWeekday;
+                  return `
+                    <label class="flex items-center gap-2 p-2 bg-surface-container-high" style="border-radius:6px; cursor:pointer; font-size:12.5px; border:1px solid var(--color-outline-variant); user-select:none; ${isSource ? 'opacity:0.5;' : ''}">
+                      <input type="checkbox" class="copy-target-checkbox" value="${idx}" ${defaultChecked ? 'checked' : ''} ${isSource ? 'disabled' : ''} onchange="ScreenS04.onTargetCheckChange()">
+                      <span style="font-weight:600; ${isSource ? 'text-decoration:line-through;' : ''}">${I18n.t(d.day)}</span>
+                      ${isSource ? '<span style="font-size:10px; color:var(--color-outline);">(Source)</span>' : ''}
+                    </label>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="modal__footer flex justify-between items-center">
+            <button class="btn btn-ghost" onclick="document.getElementById('copy-hours-modal').remove()">${I18n.t('cancel')}</button>
+            <button class="btn btn-primary" onclick="ScreenS04.applyCopiedHours()">
+              ${I18n.t('s04_copy_apply_btn')}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const existing = document.getElementById('copy-hours-modal');
+    if (existing) existing.remove();
+
+    const div = document.createElement('div');
+    div.innerHTML = modalHtml;
+    document.body.appendChild(div.firstElementChild);
+  }
+
+  function onCopySourceChange(sourceIdxStr) {
+    const sIdx = parseInt(sourceIdxStr, 10);
+    const sourceItem = list[sIdx];
+    const previewEl = document.getElementById('copy-source-details');
+    if (previewEl && sourceItem) {
+      if (sourceItem.isOpen) {
+        previewEl.innerHTML = `
+          <span><strong>Shift 1:</strong> ${sourceItem.open} - ${sourceItem.close} (LO: ${sourceItem.lastOrder})</span>
+          ${sourceItem.hasSecondShift ? `<br><span style="color:#777680;"><strong>Shift 2:</strong> ${sourceItem.secondOpen} - ${sourceItem.secondClose} (LO: ${sourceItem.secondLastOrder})</span>` : ''}
+        `;
+      } else {
+        previewEl.innerHTML = `<span style="color:#777680; font-style:italic;">Closed (Sets target days to Closed status)</span>`;
+      }
+    }
+
+    // Refresh disabled state of checkboxes
+    const checkboxes = document.querySelectorAll('.copy-target-checkbox');
+    checkboxes.forEach(cb => {
+      const idx = parseInt(cb.value, 10);
+      const parentLabel = cb.closest('label');
+      if (idx === sIdx) {
+        cb.checked = false;
+        cb.disabled = true;
+        if (parentLabel) parentLabel.style.opacity = '0.5';
+      } else {
+        cb.disabled = false;
+        if (parentLabel) parentLabel.style.opacity = '1';
+      }
+    });
+  }
+
+  function selectCopyTargets(type) {
+    const sourceSelect = document.getElementById('copy-source-select');
+    const sIdx = sourceSelect ? parseInt(sourceSelect.value, 10) : -1;
+    const checkboxes = document.querySelectorAll('.copy-target-checkbox');
+
+    checkboxes.forEach(cb => {
+      const idx = parseInt(cb.value, 10);
+      if (idx === sIdx) {
+        cb.checked = false;
+        return;
+      }
+      if (type === 'weekdays') {
+        cb.checked = idx >= 0 && idx <= 4; // Mon-Fri
+      } else if (type === 'all') {
+        cb.checked = true;
+      } else if (type === 'weekends') {
+        cb.checked = idx === 5 || idx === 6; // Sat-Sun
+      }
+    });
+  }
+
+  function onTargetCheckChange() {
+    // Keep UI responsive
+  }
+
+  function applyCopiedHours() {
+    const sourceSelect = document.getElementById('copy-source-select');
+    if (!sourceSelect) return;
+    const sIdx = parseInt(sourceSelect.value, 10);
+    const source = list[sIdx];
+    if (!source) return;
+
+    const checkedBoxes = document.querySelectorAll('.copy-target-checkbox:checked');
+    const targetIndices = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10)).filter(idx => idx !== sIdx);
+
+    if (targetIndices.length === 0) {
+      showToast('error', 'Selection Required', I18n.t('s04_copy_no_target_err'));
+      return;
+    }
+
+    targetIndices.forEach(idx => {
+      if (list[idx]) {
+        list[idx].isOpen = source.isOpen;
+        list[idx].open = source.open;
+        list[idx].close = source.close;
+        list[idx].lastOrder = source.lastOrder;
+        list[idx].hasSecondShift = !!source.hasSecondShift;
+        list[idx].secondOpen = source.secondOpen || '00:00';
+        list[idx].secondClose = source.secondClose || '02:00';
+        list[idx].secondLastOrder = source.secondLastOrder || '01:30';
+      }
+    });
+
+    const sourceName = I18n.t(source.day);
+    showToast('success', 'Hours Applied', I18n.t('s04_copy_success', { source: sourceName, count: targetIndices.length }));
+
+    const modal = document.getElementById('copy-hours-modal');
+    if (modal) modal.remove();
+
     render();
   }
 
@@ -691,6 +929,11 @@ const ScreenS04 = (() => {
     updateDuration,
     adjustSeats, 
     updateRule,
+    openCopyModal,
+    onCopySourceChange,
+    selectCopyTargets,
+    onTargetCheckChange,
+    applyCopiedHours,
     addSpecialHourModal, 
     saveSpecialHour, 
     deleteSpecialHour, 

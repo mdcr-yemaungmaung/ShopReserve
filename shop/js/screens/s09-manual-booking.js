@@ -296,7 +296,7 @@ const ScreenS09 = (() => {
     ` : '';
 
     const simulatorHtml = `
-      <div style="background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%); border-radius: 16px; padding: 16px; border: 1px solid rgba(15,76,92,0.12); box-shadow: 0 2px 6px rgba(15,76,92,0.03); margin-top: 16px;">
+      <div class="stitch-simulator-card" style="border-radius: 16px; padding: 16px; margin-top: 16px;">
         <div style="font-weight: 700; font-size: 12.5px; color: #191c1d; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
           📶 ${I18n.t('network_simulator_label')}
         </div>
@@ -329,27 +329,40 @@ const ScreenS09 = (() => {
         <div id="s09-screen">
         <form id="s09-form" onsubmit="ScreenS09.registerManualBooking(event)" class="stitch-layout-grid">
           
-          <!-- Left Column -->
+          <!-- Left Column: Customer Details, Schedule & Special Requests -->
           <div style="display: flex; flex-direction: column;">
             
-            <!-- CUSTOMER INFORMATION Card -->
+            <!-- GROUP 1: CUSTOMER INFORMATION Card -->
             <div class="stitch-card" style="display: flex; flex-direction: column; gap: 14px;">
-              <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'ဧည့်သည် အချက်အလက်' : 'CUSTOMER INFORMATION'}</span>
+              <div class="stitch-card-header">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon">👤</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_customer')}</h4>
+                </div>
+                <span class="stitch-card-badge" style="background: rgba(15, 76, 92, 0.08); color: #0F4C5C;">${lang === 'mm' ? 'မဖြစ်မနေ' : 'Required'}</span>
+              </div>
+
+              <!-- Customer Name -->
               <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label style="font-size: 13px; font-weight: 500; color: #46464f;">${I18n.t('customer_name')} <span class="text-error">*</span></label>
-                <input type="text" id="mb-name" placeholder="${lang === 'mm' ? 'ဥပမာ - ဦးမောင်မောင်' : 'e.g. John Doe'}" style="width: 100%; height: 48px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 16px; font-size: 15px; color: #1F2937; background: #f4f8fa; outline: none;" required />
+                <input type="text" id="mb-name" placeholder="${lang === 'mm' ? 'ဥပမာ - ဦးမောင်မောင်' : 'e.g. John Doe'}" style="width: 100%; height: 46px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 16px; font-size: 14.5px; color: #1F2937; background: #f4f8fa; outline: none; transition: border-color 0.15s;" required />
               </div>
+
+              <!-- Customer Phone -->
               <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label style="font-size: 13px; font-weight: 500; color: #46464f;">${I18n.t('contact_phone')} <span class="text-error">*</span></label>
                 ${Components.phoneInput({ id: 'mb-phone', required: true })}
               </div>
             </div>
 
-            <!-- SCHEDULE Card -->
+            <!-- GROUP 2: SCHEDULE (Date & Time) Card -->
             <div class="stitch-card" style="display: flex; flex-direction: column; gap: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'ရက်စွဲ နှင့် အချိန်' : 'SCHEDULE'}</span>
-                <span style="color: #0F4C5C; font-weight: 700; font-size: 12.5px;" id="selected-date-display">${activeDateDisplay} • ${activeStatus.label}</span>
+              <div class="stitch-card-header">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon">📅</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_schedule')}</h4>
+                </div>
+                <span class="stitch-card-badge" id="selected-date-display">${activeDateDisplay} • ${activeStatus.label}</span>
               </div>
 
               <!-- Monthly Grid Calendar Picker -->
@@ -358,82 +371,178 @@ const ScreenS09 = (() => {
               </div>
 
               <!-- Time Slots Grid -->
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px;" id="s09-time-container">
-                ${timeSlots.map(t => `
-                  <button type="button" data-time="${t}" onclick="ScreenS09.setTimeSlot('${t}')" class="stitch-time-slot ${t === selectedTime ? 'active' : 'inactive'}">
-                    ${t}
-                  </button>
-                `).join('')}
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+                <span style="font-size: 12px; font-weight: 600; color: #46464f; text-transform: uppercase; letter-spacing: 0.04em;">${I18n.t('visit_date_time')}</span>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;" id="s09-time-container">
+                  ${timeSlots.map(t => `
+                    <button type="button" data-time="${t}" onclick="ScreenS09.setTimeSlot('${t}')" class="stitch-time-slot ${t === selectedTime ? 'active' : 'inactive'}">
+                      ${t}
+                    </button>
+                  `).join('')}
+                </div>
               </div>
+            </div>
+
+            <!-- GROUP 5: SPECIAL REQUESTS & NOTES Card -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="stitch-card-header">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon">📝</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_notes')}</h4>
+                </div>
+                <span class="stitch-card-badge">${lang === 'mm' ? 'စိတ်ကြိုက်' : 'Optional'}</span>
+              </div>
+
+              <!-- Quick Occasion & Dietary Tags -->
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">${I18n.t('mb_quick_tags_title')}</span>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_birthday')}')">${I18n.t('mb_tag_birthday')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_anniversary')}')">${I18n.t('mb_tag_anniversary')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_highchair')}')">${I18n.t('mb_tag_highchair')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_vegetarian')}')">${I18n.t('mb_tag_vegetarian')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_nopork')}')">${I18n.t('mb_tag_nopork')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_wheelchair')}')">${I18n.t('mb_tag_wheelchair')}</button>
+                  <button type="button" class="stitch-request-chip" onclick="ScreenS09.appendNoteTag('${I18n.t('mb_tag_business')}')">${I18n.t('mb_tag_business')}</button>
+                </div>
+              </div>
+
+              <!-- Notes Textarea -->
+              <textarea id="mb-notes" placeholder="${lang === 'mm' ? 'ဓာတ်မတည့်သည့်အစားအစာများ၊ ကလေးထိုင်ခုံ စသည်...' : 'Allergies, high chair, birthday decoration, quiet corner...'}" style="width: 100%; min-height: 84px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #1F2937; background: #f4f8fa; resize: none; outline: none; transition: border-color 0.15s;"></textarea>
             </div>
 
           </div>
 
-          <!-- Right Column -->
+          <!-- Right Column: Guests, Seating, Summary & Actions (Sticky on Desktop) -->
           <div style="display: flex; flex-direction: column;" class="stitch-desktop-sticky-summary">
             
-            <!-- TOTAL GUESTS Card -->
-            <div class="stitch-card" style="display: flex; align-items: center; justify-content: space-between;">
-              <div>
-                <span class="stitch-label" style="margin-bottom: 2px;">${lang === 'mm' ? 'ဧည့်သည် ဦးရေ' : 'TOTAL GUESTS'}</span>
-                <span style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700; color: #0F4C5C;" id="guest-count">${guestCount}</span>
+            <!-- GROUP 3: TOTAL GUESTS & PARTY SIZE Card -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="stitch-card-header">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon">👥</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_guests')}</h4>
+                </div>
+                <span class="stitch-card-badge" id="guest-count-badge">${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
               </div>
-              <div style="display: flex; align-items: center; gap: 14px;">
-                <button type="button" class="stitch-stepper-btn" onclick="ScreenS09.adjustGuests(-1)">
-                  <span class="material-symbols-outlined" style="font-size: 20px;">remove</span>
+
+              <!-- 1-Tap Quick Guest Chips -->
+              <div class="stitch-guest-chips">
+                <button type="button" data-guests="2" onclick="ScreenS09.setGuestCount(2)" class="stitch-guest-chip ${guestCount === 2 ? 'active' : ''}">
+                  ${I18n.t('mb_quick_guest_2')}
                 </button>
-                <button type="button" class="stitch-stepper-btn" onclick="ScreenS09.adjustGuests(1)">
-                  <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                <button type="button" data-guests="4" onclick="ScreenS09.setGuestCount(4)" class="stitch-guest-chip ${guestCount === 4 ? 'active' : ''}">
+                  ${I18n.t('mb_quick_guest_4')}
                 </button>
+                <button type="button" data-guests="6" onclick="ScreenS09.setGuestCount(6)" class="stitch-guest-chip ${guestCount === 6 ? 'active' : ''}">
+                  ${I18n.t('mb_quick_guest_6')}
+                </button>
+                <button type="button" data-guests="8" onclick="ScreenS09.setGuestCount(8)" class="stitch-guest-chip ${guestCount === 8 ? 'active' : ''}">
+                  ${I18n.t('mb_quick_guest_8')}
+                </button>
+              </div>
+
+              <!-- Stepper Control -->
+              <div style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 8px 16px;">
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 11.5px; font-weight: 600; color: #64748B; text-transform: uppercase;">${lang === 'mm' ? 'ဧည့်သည် စုစုပေါင်း' : 'Party Count'}</span>
+                  <div style="display: flex; align-items: baseline; gap: 4px;">
+                    <span style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; color: #0F4C5C;" id="guest-count">${guestCount}</span>
+                    <span style="font-size: 13px; color: #475569; font-weight: 500;">${lang === 'mm' ? 'ဦး' : 'person(s)'}</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <button type="button" class="stitch-stepper-btn" onclick="ScreenS09.adjustGuests(-1)" aria-label="Decrease guests">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">remove</span>
+                  </button>
+                  <button type="button" class="stitch-stepper-btn" onclick="ScreenS09.adjustGuests(1)" aria-label="Increase guests">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Table & Seating Tags -->
-            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 12px;">
-              <span class="stitch-label" style="margin-bottom: 0;">${lang === 'mm' ? 'စားပွဲ နှင့် တောင်းဆိုချက် Tags' : 'SEATING & TABLE PREFERENCE'}</span>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="s09-tags-container">
-                ${tableTags.map(tag => {
-                  const isSelected = selectedSeatTags.includes(tag.code);
-                  const label = lang === 'mm' ? tag.name_mm : tag.name;
-                  return `
-                    <button type="button" data-tag-code="${tag.code}" onclick="ScreenS09.togglePreferredTag('${tag.code}')" style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1.5px solid ${isSelected ? '#0B1220' : '#CBD5E1'}; background: ${isSelected ? '#0B1220' : '#FFFFFF'}; color: ${isSelected ? '#FFFFFF' : '#334155'}; cursor: pointer; transition: all 0.15s;">
-                      ${label}
-                    </button>
-                  `;
-                }).join('')}
+            <!-- GROUP 4: SEATING & TABLE PREFERENCE Card -->
+            <div class="stitch-card" style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="stitch-card-header">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon">🪑</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_table')}</h4>
+                </div>
+                <span class="stitch-card-badge" id="s09-table-badge">${selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : (lang === 'mm' ? 'အလိုအလျောက်' : 'Auto Match')}</span>
               </div>
-              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
-                <label style="font-size: 13px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
+
+              <!-- Seating Preference Tags -->
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-size: 12px; font-weight: 600; color: #46464f;">${lang === 'mm' ? 'ထိုင်ခုံ စိတ်ကြိုက်ရွေးချယ်မှု' : 'Seating Feature Tags'}</span>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="s09-tags-container">
+                  ${tableTags.map(tag => {
+                    const isSelected = selectedSeatTags.includes(tag.code);
+                    const label = lang === 'mm' ? tag.name_mm : tag.name;
+                    return `
+                      <button type="button" data-tag-code="${tag.code}" onclick="ScreenS09.togglePreferredTag('${tag.code}')" style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1.5px solid ${isSelected ? '#0B1220' : '#CBD5E1'}; background: ${isSelected ? '#0B1220' : '#FFFFFF'}; color: ${isSelected ? '#FFFFFF' : '#334155'}; cursor: pointer; transition: all 0.15s;">
+                        ${label}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <!-- Assigned Table Select -->
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label style="font-size: 13px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
+                  <span style="font-size: 11px; color: #64748B;">${I18n.t('select_table')}</span>
+                </div>
                 <div id="s09-table-select-container">
                   ${renderTableSelectHtml()}
                 </div>
               </div>
             </div>
 
-            <!-- SPECIAL REQUESTS / NOTES Card -->
-            <div class="stitch-card">
-              <span class="stitch-label">${lang === 'mm' ? 'အထူး တောင်းဆိုချက်များ / မှတ်ချက်' : 'SPECIAL REQUESTS / NOTES'}</span>
-              <textarea id="mb-notes" placeholder="${lang === 'mm' ? 'ဓာတ်မတည့်သည့်အစားအစာများ၊ ကလေးထိုင်ခုံ စသည်...' : 'Allergies, high chair, window seat...'}" style="width: 100%; min-height: 84px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #1F2937; background: #f4f8fa; resize: none; outline: none;"></textarea>
-            </div>
-
-            <!-- Summary & Submit CTA Card -->
-            <div class="stitch-card" style="background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%); border: 1px solid rgba(15,76,92,0.14);">
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 11px; color: #46464f; font-weight: 500;">${lang === 'mm' ? 'ဘွတ်ကင် အနှစ်ချုပ်' : 'Booking Summary'}</span>
-                  <span style="font-size: 14px; color: #0F4C5C; font-weight: 700;" id="summary-text">${activeDateDisplay} • ${selectedTime} • ${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
+            <!-- GROUP 6: BOOKING SUMMARY & CONFIRMATION Card -->
+            <div class="stitch-card stitch-summary-card">
+              <div class="stitch-card-header" style="border-bottom: 1px solid rgba(15,76,92,0.12);">
+                <div class="stitch-card-header-left">
+                  <span class="stitch-card-icon" style="background: rgba(15,76,92,0.12);">📋</span>
+                  <h4 class="stitch-card-title">${I18n.t('mb_group_summary')}</h4>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                  <span style="font-size: 11px; color: #46464f; font-weight: 500;">${lang === 'mm' ? 'စားပွဲ အခြေအနေ' : 'Table Status'}</span>
-                  <span style="font-size: 14px; color: #0F4C5C; font-weight: 700;" id="summary-table-status">Table 12 (${lang === 'mm' ? 'ရရှိနိုင်ပါသည်' : 'Available'})</span>
+                <span class="stitch-card-badge" style="background: #E0F2FE; color: #0369A1; font-weight: 700;">Live Review</span>
+              </div>
+
+              <!-- Summary Items List -->
+              <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                  <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">event</span>
+                    ${lang === 'mm' ? 'ရက်စွဲ နှင့် အချိန်' : 'Date & Time'}
+                  </span>
+                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-text">${activeDateDisplay} • ${selectedTime}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                  <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">group</span>
+                    ${lang === 'mm' ? 'ဧည့်သည်' : 'Guests'}
+                  </span>
+                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-guests">${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                  <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">table_restaurant</span>
+                    ${lang === 'mm' ? 'စားပွဲ အခြေအနေ' : 'Table Status'}
+                  </span>
+                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-table-status">Table 12 (${lang === 'mm' ? 'ရရှိနိုင်ပါသည်' : 'Available'})</span>
                 </div>
               </div>
+
+              <!-- Primary Submit CTA -->
               <button type="submit" class="stitch-register-btn">
                 <span class="material-symbols-outlined" style="font-size: 22px; font-variation-settings: 'FILL' 1;">check_circle</span>
-                ${lang === 'mm' ? 'ဘွတ်ကင် စာရင်းသွင်းမည်' : 'Register Booking'}
+                <span>${lang === 'mm' ? 'ဘွတ်ကင် စာရင်းသွင်းမည်' : 'Register Booking'}</span>
               </button>
             </div>
 
+            <!-- Network Simulator Card -->
             ${simulatorHtml}
 
           </div>
@@ -444,7 +553,7 @@ const ScreenS09 = (() => {
     `;
 
     const content = `
-      ${Components.pageHeader(I18n.t('manual_booking'), lang === 'mm' ? 'ဖုန်းဖြင့် ဘွတ်ကင်အသစ် ကြိုတင်စာရင်းသွင်းရန်' : 'Create a new phone reservation.')}
+      ${Components.pageHeader(I18n.t('manual_booking'), lang === 'mm' ? 'ဧည့်သည် ကြိုတင်စာရင်းအသစ် သွင်းယူရန်' : 'Create a new reservation.')}
       ${formHtml}
     `;
 
@@ -454,8 +563,8 @@ const ScreenS09 = (() => {
 
   function setSource(type) {
     bookingSource = type;
-    const btnPhone = document.getElementById('btn-phone');
-    const btnWalkin = document.getElementById('btn-walkin');
+    const btnPhone = document.getElementById('s09-btn-phone') || document.getElementById('btn-phone');
+    const btnWalkin = document.getElementById('s09-btn-walkin') || document.getElementById('btn-walkin');
 
     if (btnPhone && btnWalkin) {
       if (type === 'phone') {
@@ -466,6 +575,7 @@ const ScreenS09 = (() => {
         btnPhone.className = 'stitch-btn-inactive';
       }
     }
+    updateSummary();
   }
 
   function changeMonth(delta) {
@@ -521,12 +631,50 @@ const ScreenS09 = (() => {
     updateSummary();
   }
 
-  function adjustGuests(val) {
-    guestCount = Math.max(1, Math.min(20, guestCount + val));
+  function setGuestCount(count) {
+    guestCount = Math.max(1, Math.min(20, count));
     const el = document.getElementById('guest-count');
     if (el) el.innerText = guestCount;
+    const badge = document.getElementById('guest-count-badge');
+    if (badge) {
+      const lang = I18n.getLang();
+      badge.innerText = `${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
+    }
+    updateGuestChips();
     refreshTableSelect();
     updateSummary();
+  }
+
+  function adjustGuests(val) {
+    setGuestCount(guestCount + val);
+  }
+
+  function updateGuestChips() {
+    const chips = document.querySelectorAll('.stitch-guest-chip');
+    chips.forEach(chip => {
+      const val = parseInt(chip.getAttribute('data-guests'), 10);
+      if (val === guestCount) {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+  }
+
+  function appendNoteTag(tagText) {
+    const textarea = document.getElementById('mb-notes');
+    if (!textarea) return;
+    const current = textarea.value.trim();
+    if (!current) {
+      textarea.value = tagText;
+    } else if (current.includes(tagText)) {
+      // Toggle off cleanly
+      const regex = new RegExp(`(^|,\\s*)${tagText.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}(,\\s*|$)`, 'g');
+      textarea.value = current.replace(regex, ', ').replace(/^,\s*/, '').replace(/,\s*$/, '').replace(/,\s*,/g, ', ').trim();
+    } else {
+      textarea.value = current + ', ' + tagText;
+    }
+    textarea.focus();
   }
 
   function togglePreferredTag(tagCode) {
@@ -549,6 +697,12 @@ const ScreenS09 = (() => {
       });
     }
 
+    const tableBadge = document.getElementById('s09-table-badge');
+    if (tableBadge) {
+      const lang = I18n.getLang();
+      tableBadge.innerText = selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : (lang === 'mm' ? 'အလိုအလျောက်' : 'Auto Match');
+    }
+
     refreshTableSelect();
     updateSummary();
   }
@@ -559,7 +713,12 @@ const ScreenS09 = (() => {
     
     const summaryTextEl = document.getElementById('summary-text');
     if (summaryTextEl) {
-      summaryTextEl.innerText = `${activeDateDisplay} • ${selectedTime} • ${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
+      summaryTextEl.innerText = `${activeDateDisplay} • ${selectedTime}`;
+    }
+
+    const summaryGuestsEl = document.getElementById('summary-guests');
+    if (summaryGuestsEl) {
+      summaryGuestsEl.innerText = `${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
     }
 
     const tableSelect = document.getElementById('mb-table');
@@ -657,6 +816,8 @@ const ScreenS09 = (() => {
     setSelectedDate,
     setTimeSlot,
     adjustGuests,
+    setGuestCount,
+    appendNoteTag,
     togglePreferredTag, 
     clearSeatPreferences,
     refreshTableSelect,
