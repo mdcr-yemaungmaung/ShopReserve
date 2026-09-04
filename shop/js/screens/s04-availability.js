@@ -28,6 +28,18 @@ const ScreenS04 = (() => {
   let minPartySize = 1;            // min guests
   let maxPartySize = 10;           // max guests
 
+  // Effective Date Management (適用開始日 / effective_from)
+  let effectiveDateType = 'immediate'; // 'immediate' | 'specific'
+  let effectiveDateVal = '2026-10-01';
+
+  // Responsive Accordion Expansion States
+  let expandedSections = {
+    sec1: true,
+    sec2: true,
+    sec3: true,
+    sec4: true
+  };
+
   let initialized = false;
 
   function initData() {
@@ -72,7 +84,7 @@ const ScreenS04 = (() => {
     }
 
     const timeValidationAlertHtml = timeRangeErrorMsg ? `
-      <div class="p-3 bg-error-container text-on-error-container mb-4" style="border-radius: var(--radius-md); font-size:12.5px; border: 1.5px solid var(--color-error); line-height:1.4; font-family:'Inter', sans-serif;">
+      <div class="p-3 bg-error-container text-on-error-container mb-4" style="border-radius: var(--radius-md); font-size:12.5px; border: 1.5px solid var(--color-error); line-height:1.5; font-family:'Inter', sans-serif;">
         ${timeRangeErrorMsg}
       </div>
     ` : '';
@@ -92,12 +104,12 @@ const ScreenS04 = (() => {
 
     const warningBanner = isStaff ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md); font-weight:600; font-size:13px;">
-        ⚠️ ${lang === 'mm' ? 'ဖတ်ရှုရန်သာ: ဆိုင်ပိုင်ရှင် (Shop Owner) သာ အပြောင်းအလဲများ ပြုလုပ်သိမ်းဆည်းနိုင်ပါသည်။' : 'Read-Only Mode: Only the Shop Owner (shop_owner) can modify availability settings (C-05).'}
+        ⚠️ ${I18n.t('s04_readonly_owner_warning')}
       </div>
     ` : '';
 
     // ==========================================
-    // Section: Regular Business Hours (shop_business_hours)
+    // Section 1: Regular Business Hours (shop_business_hours)
     // ==========================================
     const hourRows = list.map((item, idx) => {
       const dayLabel = I18n.t(item.day);
@@ -133,7 +145,7 @@ const ScreenS04 = (() => {
                 </span>
               ` : `
                 <span style="font-size:11.5px; font-weight:600; color:#777680; background:#edf2f5; padding:2px 8px; border-radius:6px; width:fit-content;">
-                  Closed
+                  ${I18n.t('closed') || 'Closed'}
                 </span>
               `}
             </div>
@@ -158,7 +170,7 @@ const ScreenS04 = (() => {
                   📋 ${I18n.t('copy') || 'Copy'}
                 </button>
                 <button class="btn btn-ghost btn-sm" onclick="ScreenS04.toggleSecondShift(${idx})" style="padding:6px 10px; font-size:12px; font-weight:600; color:#0F4C5C; background:#f4f8fa; border:1px solid rgba(15,76,92,0.15); border-radius:6px;">
-                  ${item.hasSecondShift ? '✕ Remove Split' : '➕ Split Shift'}
+                  ${item.hasSecondShift ? I18n.t('s04_remove_split_btn') : I18n.t('s04_split_shift_btn')}
                 </button>
               ` : ''}
               <label class="toggle">
@@ -168,11 +180,11 @@ const ScreenS04 = (() => {
             </div>
           </div>
 
-          <!-- Secondary Shift Row for midnight crossings (Row 2 registration rule) -->
+          <!-- Secondary Shift Row for mid-day break or midnight crossings -->
           ${item.isOpen && item.hasSecondShift ? `
             <div class="flex items-center gap-4 justify-between mt-2.5 p-3 bg-surface-container-low" style="border-radius:8px; font-size:13px; margin-left:12px; border: 1.5px dashed rgba(15,76,92,0.25); flex-wrap:wrap; background:#f4f8fa;">
               <div style="font-weight:700; color:#0F4C5C; display:flex; align-items:center; gap:6px;">
-                🌙 Shift 2 (After Midnight)
+                🌙 ${I18n.t('s04_break_time_badge')}
               </div>
               <div class="availability-time-group flex items-center gap-3" style="flex:1;">
                 <div class="flex items-center gap-2">
@@ -185,7 +197,7 @@ const ScreenS04 = (() => {
                   <input type="time" class="form-input" style="width:130px; height:38px; font-size:15px; font-weight:700; color:#0F4C5C; background:#f4f8fa; border:1.5px solid ${item.secondLastOrder && (item.secondLastOrder < item.secondOpen || item.secondLastOrder > item.secondClose) ? 'var(--color-error)' : 'rgba(15,76,92,0.25)'}; text-align:center; padding:0 8px;" value="${item.secondLastOrder}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSecondTime(${idx}, 'secondLastOrder', this.value)">
                 </div>
               </div>
-              <div style="font-size:11.5px; color:#777680; font-style:italic;">* Mid-day break or post-midnight hours</div>
+              <div style="font-size:11.5px; color:#777680; font-style:italic;">${I18n.t('s04_break_time_hint')}</div>
             </div>
           ` : ''}
 
@@ -199,54 +211,74 @@ const ScreenS04 = (() => {
       `;
     }).join('');
 
-    // ==========================================
-    // Section: Special & Holiday Hours (shop_special_hours)
-    // ==========================================
-    const specialHoursCard = `
-      <div class="card flex flex-col gap-4">
-        <div class="flex justify-between items-center">
-          <div>
-            <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); margin:0;">
-              Special & Holiday Hours
-            </h3>
-            <div style="font-size:11.5px; color:var(--color-outline); margin-top:2px;">
-              Override regular weekday hours for holidays, private events, or special business dates.
-            </div>
-          </div>
-          ${isStaff ? '' : `<button class="btn btn-secondary btn-sm" onclick="ScreenS04.addSpecialHourModal()">${Components.icon('plus', 14)} Add Exception Date</button>`}
+    // Effective Date Card inside Section 1
+    const effectiveDateCardHtml = `
+      <div class="s04-effective-card mb-3">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span style="font-weight:700; font-size:13px; color:var(--color-primary); display:flex; align-items:center; gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">event_repeat</span>
+            ${I18n.t('s04_effective_label')}
+          </span>
+          <span style="font-size:11.5px; color:var(--color-on-surface-variant); font-style:italic;">
+            ${I18n.t('s04_effective_hint')}
+          </span>
         </div>
-
-        <div class="flex flex-col gap-3">
-          ${specialHours.length === 0 ? `
-            <div style="font-size:12px; color:var(--color-outline); padding:16px; text-align:center; background:var(--color-surface-container); border-radius:var(--radius-md);">
-              No special business hours or holiday closures scheduled.
-            </div>
-          ` : specialHours.map(h => `
-            <div class="flex justify-between items-start p-3 ${h.type === 'closed' ? 'bg-error-container text-on-error-container' : 'bg-surface-container-high'}" style="border-radius:var(--radius-md); font-size:12.5px; border:1px solid ${h.type === 'closed' ? 'var(--color-error)' : 'var(--color-outline-variant)'};">
-              <div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <strong style="font-weight:700;">${h.name}</strong>
-                  <span class="badge ${h.type === 'closed' ? 'badge--error' : 'badge--primary'}" style="font-size:10px; padding:1px 6px;">
-                    ${h.type === 'closed' ? 'Temporary Closure' : 'Special Hours'}
-                  </span>
-                </div>
-                <div style="font-size:11.5px; margin-top:3px; opacity:0.9;">
-                  📅 <strong>${h.start}</strong> ${h.start !== h.end ? `to <strong>${h.end}</strong>` : ''}
-                  ${h.type === 'special_hours' ? ` • ⏰ ${h.open} - ${h.close} (LO: ${h.lastOrder})` : ''}
-                </div>
-                ${h.note ? `<div style="font-size:11px; margin-top:2px; font-style:italic; opacity:0.8;">Note: ${h.note}</div>` : ''}
-              </div>
-              ${isStaff ? '' : `<button class="btn btn-ghost btn-sm" style="color:${h.type === 'closed' ? 'var(--color-error)' : 'var(--color-outline)'}; padding:4px 8px;" onclick="ScreenS04.deleteSpecialHour(${h.id})">✕</button>`}
-            </div>
-          `).join('')}
+        <div class="s04-effective-options">
+          <label class="s04-effective-radio-label">
+            <input type="radio" name="s04-effective-type" value="immediate" ${effectiveDateType === 'immediate' ? 'checked' : ''} ${isStaff ? 'disabled' : ''} onchange="ScreenS04.setEffectiveType('immediate')">
+            <span>${I18n.t('s04_effective_immediate')}</span>
+          </label>
+          <label class="s04-effective-radio-label">
+            <input type="radio" name="s04-effective-type" value="specific" ${effectiveDateType === 'specific' ? 'checked' : ''} ${isStaff ? 'disabled' : ''} onchange="ScreenS04.setEffectiveType('specific')">
+            <span>${I18n.t('s04_effective_specific')}</span>
+          </label>
+          ${effectiveDateType === 'specific' ? `
+            <input type="date" class="form-input" style="height:34px; font-size:12.5px; width:150px; font-weight:600;" value="${effectiveDateVal}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.setEffectiveDate(this.value)">
+          ` : ''}
         </div>
       </div>
     `;
 
     // ==========================================
-    // Section: Slot Settings (shops: slot_interval, duration, capacity)
+    // Section 2: Special & Holiday Hours (shop_special_hours)
     // ==========================================
-    // Generate sample preview slots
+    const specialHoursContent = `
+      <div class="flex justify-between items-center mb-3">
+        <span style="font-size:12px; color:var(--color-outline);">
+          * Holidays can be scheduled indefinitely in advance beyond normal booking window.
+        </span>
+        ${isStaff ? '' : `<button class="btn btn-secondary btn-sm" onclick="ScreenS04.addSpecialHourModal()">${Components.icon('plus', 14)} ${I18n.t('s04_add_exception_btn')}</button>`}
+      </div>
+
+      <div class="flex flex-col gap-3">
+        ${specialHours.length === 0 ? `
+          <div style="font-size:12px; color:var(--color-outline); padding:16px; text-align:center; background:var(--color-surface-container); border-radius:var(--radius-md);">
+            ${I18n.t('s04_no_special_hours')}
+          </div>
+        ` : specialHours.map(h => `
+          <div class="flex justify-between items-start p-3 ${h.type === 'closed' ? 'bg-error-container text-on-error-container' : 'bg-surface-container-high'}" style="border-radius:var(--radius-md); font-size:12.5px; border:1px solid ${h.type === 'closed' ? 'var(--color-error)' : 'var(--color-outline-variant)'};">
+            <div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <strong style="font-weight:700;">${h.name}</strong>
+                <span class="badge ${h.type === 'closed' ? 'badge--error' : 'badge--primary'}" style="font-size:10px; padding:1px 6px;">
+                  ${h.type === 'closed' ? I18n.t('s04_temp_closure') : I18n.t('s04_special_hours_badge')}
+                </span>
+              </div>
+              <div style="font-size:11.5px; margin-top:3px; opacity:0.9;">
+                📅 <strong>${h.start}</strong> ${h.start !== h.end ? `to <strong>${h.end}</strong>` : ''}
+                ${h.type === 'special_hours' ? ` • ⏰ ${h.open} - ${h.close} (LO: ${h.lastOrder})` : ''}
+              </div>
+              ${h.note ? `<div style="font-size:11px; margin-top:2px; font-style:italic; opacity:0.8;">Note: ${h.note}</div>` : ''}
+            </div>
+            ${isStaff ? '' : `<button class="btn btn-ghost btn-sm" style="color:${h.type === 'closed' ? 'var(--color-error)' : 'var(--color-outline)'}; padding:4px 8px;" onclick="ScreenS04.deleteSpecialHour(${h.id})">✕</button>`}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // ==========================================
+    // Section 3: Slot Settings (shops: slot_interval, duration, capacity)
+    // ==========================================
     const previewSlots = [];
     const openH = 11;
     const closeH = 22;
@@ -260,177 +292,178 @@ const ScreenS04 = (() => {
       previewSlots.push(`${startStr}-${endStr}`);
     }
 
-    const slotConfigSection = `
-      <div class="card flex flex-col gap-4">
-        <div>
-          <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); margin:0;">
-            Slot Generation Parameters
-          </h3>
-          <div style="font-size:11.5px; color:var(--color-outline); margin-top:2px;">
-            Configures how BAT-03 slices daily business hours into bookable slots (shop_schedules).
-          </div>
+    const slotConfigContent = `
+      <div class="grid grid-3 gap-4 mb-3" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));">
+        <!-- Slot Interval -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_slot_interval_label')}<span class="required">*</span>
+          </label>
+          <select class="form-input" style="height:36px; font-size:12.5px;" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSlotInterval(this.value)">
+            <option value="30" ${slotIntervalMin === 30 ? 'selected' : ''}>30 Minutes</option>
+            <option value="60" ${slotIntervalMin === 60 ? 'selected' : ''}>60 Minutes (Default)</option>
+          </select>
+          <span class="form-hint" style="font-size:10.5px;">${I18n.t('s04_slot_interval_hint', { min: slotIntervalMin })}</span>
         </div>
 
-        <div class="grid grid-3 gap-4" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));">
-          <!-- Slot Interval -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Slot Interval<span class="required">*</span>
-            </label>
-            <select class="form-input" style="height:36px; font-size:12.5px;" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateSlotInterval(this.value)">
-              <option value="30" ${slotIntervalMin === 30 ? 'selected' : ''}>30 Minutes</option>
-              <option value="60" ${slotIntervalMin === 60 ? 'selected' : ''}>60 Minutes (Default)</option>
-            </select>
-            <span class="form-hint" style="font-size:10.5px;">Slices open hours into ${slotIntervalMin}-min bookable blocks.</span>
+        <!-- Default Duration -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_default_duration_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:100px;" min="30" max="480" step="15" value="${defaultDurationMin}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateDuration(this.value)">
+            <span style="font-size:12px; color:var(--color-outline);">Minutes</span>
           </div>
-
-          <!-- Default Duration -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Default Duration<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:100px;" min="30" max="480" step="15" value="${defaultDurationMin}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateDuration(this.value)">
-              <span style="font-size:12px; color:var(--color-outline);">Minutes</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">Used when customer does not select a course menu.</span>
-          </div>
-
-          <!-- Slot Capacity -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Capacity per Slot<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <div class="number-stepper">
-                <button class="number-stepper__btn" ${isStaff ? 'disabled' : ''} onclick="ScreenS04.adjustSeats(-2)">${Components.icon('minus', 14)}</button>
-                <span class="number-stepper__value" style="font-size:13px; font-weight:700;">${slotCapacity}</span>
-                <button class="number-stepper__btn" ${isStaff ? 'disabled' : ''} onclick="ScreenS04.adjustSeats(2)">${Components.icon('plus', 14)}</button>
-              </div>
-              <span style="font-size:12px; color:var(--color-outline);">Guests</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">Initial value calculated from the table sum defined in <a href="#/shop/tables" style="color:var(--color-primary); text-decoration:underline;">Table Management</a>.</span>
-          </div>
+          <span class="form-hint" style="font-size:10.5px;">${I18n.t('s04_default_duration_hint')}</span>
         </div>
 
-        <!-- Generation Preview -->
-        <div class="p-3 bg-surface-container flex flex-col gap-2" style="border-radius:var(--radius-md); border:1px solid var(--color-outline-variant);">
-          <div style="font-size:12px; font-weight:700; color:var(--color-primary); display:flex; align-items:center; justify-content:space-between;">
-            <span>👁️ Slot Schedule Preview</span>
-            <span class="badge badge--info" style="font-size:10px;">${previewSlots.length} slots / day • ${slotCapacity} guests each</span>
+        <!-- Slot Capacity -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_capacity_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <div class="number-stepper">
+              <button class="number-stepper__btn" ${isStaff ? 'disabled' : ''} onclick="ScreenS04.adjustSeats(-2)">${Components.icon('minus', 14)}</button>
+              <span class="number-stepper__value" style="font-size:13px; font-weight:700;">${slotCapacity}</span>
+              <button class="number-stepper__btn" ${isStaff ? 'disabled' : ''} onclick="ScreenS04.adjustSeats(2)">${Components.icon('plus', 14)}</button>
+            </div>
+            <span style="font-size:12px; color:var(--color-outline);">Guests</span>
           </div>
-          <div style="font-size:11px; color:var(--color-on-surface-variant); line-height:1.5;">
-            Example daily slot allocation for regular business day (11:00 - 22:00):<br>
-            <strong>${previewSlots.slice(0, 6).join(' • ')} ... (${previewSlots.length} slots total)</strong>
-          </div>
+          <span class="form-hint" style="font-size:10.5px;">${I18n.t('s04_capacity_hint')}</span>
+        </div>
+      </div>
+
+      <!-- Generation Preview -->
+      <div class="p-3 bg-surface-container flex flex-col gap-2" style="border-radius:var(--radius-md); border:1px solid var(--color-outline-variant);">
+        <div style="font-size:12px; font-weight:700; color:var(--color-primary); display:flex; align-items:center; justify-content:space-between;">
+          <span>👁️ Slot Schedule Preview</span>
+          <span class="badge badge--info" style="font-size:10px;">${previewSlots.length} slots / day • ${slotCapacity} guests each</span>
+        </div>
+        <div style="font-size:11px; color:var(--color-on-surface-variant); line-height:1.5;">
+          Example daily slot allocation for regular business day (11:00 - 22:00):<br>
+          <strong>${previewSlots.slice(0, 6).join(' • ')} ... (${previewSlots.length} slots total)</strong>
         </div>
       </div>
     `;
 
     // ==========================================
-    // Section: Booking Acceptance Rules (shops: booking_window, cutoff, min/max party)
+    // Section 4: Booking Acceptance Rules (shops: booking_window, cutoff, min/max party)
     // ==========================================
-    const bookingRulesSection = `
-      <div class="card flex flex-col gap-4">
-        <div>
-          <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); margin:0;">
-            Booking Acceptance Rules
-          </h3>
-          <div style="font-size:11.5px; color:var(--color-outline); margin-top:2px;">
-            Booking window limits and cutoff deadlines enforced on user reservation screens (U-04 / U-05).
+    const bookingRulesContent = `
+      <div class="grid grid-4 gap-4" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));">
+        <!-- Booking Window Days -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_booking_window_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:90px;" min="1" max="180" value="${bookingWindowDays}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('bookingWindowDays', this.value)">
+            <span style="font-size:12px; color:var(--color-outline);">Days ahead</span>
           </div>
+          <span class="form-hint" style="font-size:10.5px;">${I18n.t('s04_booking_window_hint', { days: bookingWindowDays })}</span>
         </div>
 
-        <div class="grid grid-4 gap-4" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));">
-          <!-- Booking Window Days -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Booking Window<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:90px;" min="1" max="180" value="${bookingWindowDays}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('bookingWindowDays', this.value)">
-              <span style="font-size:12px; color:var(--color-outline);">Days ahead</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">BAT-03 generates calendar slots up to ${bookingWindowDays} days ahead.</span>
+        <!-- Cutoff Minutes -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_cutoff_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:90px;" min="0" max="1440" step="15" value="${bookingCutoffMin}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('bookingCutoffMin', this.value)">
+            <span style="font-size:12px; color:var(--color-outline);">Minutes before</span>
           </div>
+          <span class="form-hint" style="font-size:10.5px;">${I18n.t('s04_cutoff_hint', { min: bookingCutoffMin })}</span>
+        </div>
 
-          <!-- Cutoff Minutes -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Cutoff Before Arrival<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:90px;" min="0" max="1440" step="15" value="${bookingCutoffMin}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('bookingCutoffMin', this.value)">
-              <span style="font-size:12px; color:var(--color-outline);">Minutes before</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">Slots within ${bookingCutoffMin} min of start time are disabled in U-04.</span>
+        <!-- Min Party Size -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_min_party_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:80px;" min="1" max="20" value="${minPartySize}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('minPartySize', this.value)">
+            <span style="font-size:12px; color:var(--color-outline);">Guests</span>
           </div>
+          <span class="form-hint" style="font-size:10.5px;">Minimum guests per booking.</span>
+        </div>
 
-          <!-- Min Party Size -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Min Party Size<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:80px;" min="1" max="20" value="${minPartySize}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('minPartySize', this.value)">
-              <span style="font-size:12px; color:var(--color-outline);">Guests</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">Minimum guests per booking.</span>
+        <!-- Max Party Size -->
+        <div class="form-group mb-0">
+          <label class="form-label" style="font-size:12px; font-weight:600;">
+            ${I18n.t('s04_max_party_label')}<span class="required">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:80px;" min="${minPartySize}" max="100" value="${maxPartySize}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('maxPartySize', this.value)">
+            <span style="font-size:12px; color:var(--color-outline);">Guests</span>
           </div>
-
-          <!-- Max Party Size -->
-          <div class="form-group mb-0">
-            <label class="form-label" style="font-size:12px; font-weight:600;">
-              Max Party Size<span class="required">*</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input type="number" class="form-input" style="height:36px; font-size:12.5px; width:80px;" min="${minPartySize}" max="100" value="${maxPartySize}" ${isStaff ? 'disabled' : ''} onchange="ScreenS04.updateRule('maxPartySize', this.value)">
-              <span style="font-size:12px; color:var(--color-outline);">Guests</span>
-            </div>
-            <span class="form-hint" style="font-size:10.5px;">Enforced as shop max party limit on U-04/U-05.</span>
-          </div>
+          <span class="form-hint" style="font-size:10.5px;">Enforced as shop max party limit on U-04/U-05.</span>
         </div>
       </div>
     `;
 
-    // Batch Status Side Block
-    const batchBlock = `
-      <div class="card flex flex-col gap-3 p-4" style="background:rgba(19, 21, 70, 0.02); border: 1.5px dashed var(--color-outline-variant);">
-        <h4 style="font-size:13px; font-weight:700; color:var(--color-primary); margin:0;">⚙️ Slot Generator Status (BAT-03)</h4>
-        <div style="font-size:11.5px; color:var(--color-outline); line-height:1.4;">
-          The system auto-generates <strong>${bookingWindowDays} days</strong> of booking slot schedules daily from these 4 sections.
+    // BAT-26 & Zero Cancellation Policy Card
+    const batProtectionCard = `
+      <div class="s04-protection-card">
+        <div style="font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:20px;">published_with_changes</span>
+          ${I18n.t('s04_bat26_title')}
         </div>
-        <div style="font-size:11px; color:var(--color-warning-dark, #795900); background:rgba(255, 198, 65, 0.15); padding:6px 10px; border-radius:6px;">
-          ℹ️ Changes to slot interval (${slotIntervalMin}m) or capacity take effect on <strong>new slots generated starting tomorrow (BAT-03)</strong> to preserve existing reservations.
+        <div style="font-size:12.5px;">
+          ${I18n.t('s04_bat26_desc')}
         </div>
-        <div class="flex items-center justify-between mt-2 flex-wrap gap-2">
-          <span style="font-size:11px; font-weight:600; color:var(--color-success);">🟢 Active (Last Run: Today 04:00)</span>
-          ${isStaff ? '' : `<button class="btn btn-secondary btn-sm" onclick="ScreenS04.triggerBatch()" style="padding:4px 10px; font-size:11px;">Simulate BAT-03 Run</button>`}
+        <div style="font-size:12px; font-weight:600; padding:8px 12px; background:rgba(22,101,52,0.08); border-radius:6px; margin-top:4px;">
+          🛡️ ${I18n.t('s04_existing_booking_protect')}
+        </div>
+        <div class="flex items-center justify-between mt-1 flex-wrap gap-2">
+          <span style="font-size:11.5px; font-weight:600; color:#15803d;">🟢 BAT-26 Integrated • 60-Day Slot Synchronization</span>
+          ${isStaff ? '' : `<button class="btn btn-secondary btn-sm" onclick="ScreenS04.triggerBatch()" style="padding:4px 10px; font-size:11.5px;">Simulate BAT-26 Run</button>`}
         </div>
       </div>
     `;
 
     const saveDisabledAttr = (isStaff || timeRangeErrorMsg) ? 'disabled' : '';
 
+    // Overall Page Layout
     const content = `
       ${debugRoleBar}
       ${warningBanner}
-      ${Components.pageHeader('Availability & Slots Settings', 'Configure business hours, special exceptions, slot parameters, and reservation window rules')}
+      ${Components.pageHeader(I18n.t('s04_title'), I18n.t('s04_subtitle'))}
 
-      <div style="display:flex; flex-direction:column; gap:24px; max-width:1080px; margin:0 auto;">
+      <div style="display:flex; flex-direction:column; gap:20px; max-width:1080px; margin:0 auto;">
         
-        <!-- Section 1: Business Hours -->
-        <section class="card flex flex-col gap-4">
-          <div class="flex justify-between items-center flex-wrap gap-2" style="border-bottom:1px solid var(--color-surface-container); padding-bottom:8px;">
-            <div>
-              <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); margin:0;">
-                Regular Weekly Business Hours
-              </h3>
-              <div style="font-size:11.5px; color:var(--color-outline); margin-top:2px;">
-                Define open/close times, last orders, and optional mid-day breaks for each day of the week.
+        <!-- Accordion Quick Toggle Toolbar -->
+        <div class="flex justify-between items-center flex-wrap gap-2 px-1">
+          <span style="font-size:12.5px; font-weight:600; color:var(--color-primary); display:flex; align-items:center; gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">tune</span>
+            4 Master Configuration Sections
+          </span>
+          <div class="flex gap-2">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="ScreenS04.toggleAllSections(true)" style="font-size:11.5px; padding:3px 10px; background:var(--color-surface); border:1px solid var(--color-outline-variant); border-radius:6px;">
+              ${I18n.t('s04_accordion_expand_all')}
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="ScreenS04.toggleAllSections(false)" style="font-size:11.5px; padding:3px 10px; background:var(--color-surface); border:1px solid var(--color-outline-variant); border-radius:6px;">
+              ${I18n.t('s04_accordion_collapse_all')}
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Business Hours Accordion Card -->
+        <div class="s04-accordion-item ${expandedSections.sec1 ? 'is-expanded' : ''}">
+          <button type="button" class="s04-accordion-header" onclick="ScreenS04.toggleSection('sec1')">
+            <div class="s04-accordion-header__title-wrap">
+              <span class="s04-accordion-header__badge">❶</span>
+              <div class="s04-accordion-header__text">
+                <h3 class="s04-accordion-header__title">${I18n.t('s04_sec1_title')}</h3>
+                <span class="s04-accordion-header__desc">${I18n.t('s04_sec1_desc')}</span>
               </div>
             </div>
-            <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined s04-accordion-header__chevron">expand_more</span>
+          </button>
+          <div class="s04-accordion-body">
+            ${effectiveDateCardHtml}
+            <div class="flex justify-between items-center flex-wrap gap-2 mb-3 pb-2" style="border-bottom:1px solid var(--color-surface-container);">
               <span style="font-size:11px; color:var(--color-outline);">* LO = Last Order Time</span>
               ${isStaff ? '' : `
                 <button class="btn btn-secondary btn-sm" onclick="ScreenS04.openCopyModal(0)" style="font-size:12px; font-weight:600; padding:5px 12px; display:inline-flex; align-items:center; gap:6px;">
@@ -438,36 +471,85 @@ const ScreenS04 = (() => {
                 </button>
               `}
             </div>
+            ${timeValidationAlertHtml}
+            <div class="flex flex-col">
+              ${hourRows}
+            </div>
           </div>
-          
-          ${timeValidationAlertHtml}
+        </div>
 
-          <div class="flex flex-col">
-            ${hourRows}
+        <!-- Section 2: Special & Holiday Hours Accordion Card -->
+        <div class="s04-accordion-item ${expandedSections.sec2 ? 'is-expanded' : ''}">
+          <button type="button" class="s04-accordion-header" onclick="ScreenS04.toggleSection('sec2')">
+            <div class="s04-accordion-header__title-wrap">
+              <span class="s04-accordion-header__badge">❷</span>
+              <div class="s04-accordion-header__text">
+                <h3 class="s04-accordion-header__title">${I18n.t('s04_sec2_title')}</h3>
+                <span class="s04-accordion-header__desc">${I18n.t('s04_sec2_desc')}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--neutral" style="font-size:11px;">${specialHours.length}</span>
+              <span class="material-symbols-outlined s04-accordion-header__chevron">expand_more</span>
+            </div>
+          </button>
+          <div class="s04-accordion-body">
+            ${specialHoursContent}
           </div>
-        </section>
+        </div>
 
-        <!-- Section 2: Special & Holiday Hours -->
-        ${specialHoursCard}
+        <!-- Section 3: Slot Settings Accordion Card -->
+        <div class="s04-accordion-item ${expandedSections.sec3 ? 'is-expanded' : ''}">
+          <button type="button" class="s04-accordion-header" onclick="ScreenS04.toggleSection('sec3')">
+            <div class="s04-accordion-header__title-wrap">
+              <span class="s04-accordion-header__badge">❸</span>
+              <div class="s04-accordion-header__text">
+                <h3 class="s04-accordion-header__title">${I18n.t('s04_sec3_title')}</h3>
+                <span class="s04-accordion-header__desc">${I18n.t('s04_sec3_desc')}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--info" style="font-size:11px;">${slotIntervalMin}m / ${slotCapacity}p</span>
+              <span class="material-symbols-outlined s04-accordion-header__chevron">expand_more</span>
+            </div>
+          </button>
+          <div class="s04-accordion-body">
+            ${slotConfigContent}
+          </div>
+        </div>
 
-        <!-- Section 3: Slot Settings -->
-        ${slotConfigSection}
+        <!-- Section 4: Booking Acceptance Rules Accordion Card -->
+        <div class="s04-accordion-item ${expandedSections.sec4 ? 'is-expanded' : ''}">
+          <button type="button" class="s04-accordion-header" onclick="ScreenS04.toggleSection('sec4')">
+            <div class="s04-accordion-header__title-wrap">
+              <span class="s04-accordion-header__badge">❹</span>
+              <div class="s04-accordion-header__text">
+                <h3 class="s04-accordion-header__title">${I18n.t('s04_sec4_title')}</h3>
+                <span class="s04-accordion-header__desc">${I18n.t('s04_sec4_desc')}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--neutral" style="font-size:11px;">${bookingWindowDays}d</span>
+              <span class="material-symbols-outlined s04-accordion-header__chevron">expand_more</span>
+            </div>
+          </button>
+          <div class="s04-accordion-body">
+            ${bookingRulesContent}
+          </div>
+        </div>
 
-        <!-- Section 4: Booking Acceptance Rules -->
-        ${bookingRulesSection}
+        <!-- BAT-26 Recalculation & Zero-Cancellation Protection Card -->
+        ${batProtectionCard}
 
-        <!-- Batch info -->
-        ${batchBlock}
-
-        <!-- Global Save Actions -->
-        <div class="card p-4 flex justify-between items-center flex-wrap gap-4" style="position:sticky; bottom:16px; z-index:10; background:var(--color-surface-container-lowest, #fff); box-shadow:0 4px 16px rgba(0,0,0,0.08); border-radius:var(--radius-md);">
-          <div style="font-size:12px; color:var(--color-outline);">
-            ${isStaff ? 'Viewing in Read-Only Mode (Staff)' : 'All 4 sections will be saved simultaneously to shops / shop_business_hours / shop_special_hours.'}
+        <!-- Global Save Actions Bar -->
+        <div class="card p-4 flex justify-between items-center flex-wrap gap-4" style="background:var(--color-surface); border:1px solid var(--color-outline-variant); border-radius:var(--radius-lg, 12px); box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <div style="font-size:12.5px; color:var(--color-on-surface-variant); line-height:1.5;">
+            ${isStaff ? I18n.t('s04_save_notice_readonly') : I18n.t('s04_save_notice')}
           </div>
           <div class="flex gap-3">
             <button class="btn btn-ghost" onclick="Router.navigate('/shop/dashboard')">${I18n.t('cancel')}</button>
             <button class="btn btn-primary" ${saveDisabledAttr} onclick="ScreenS04.saveSettings()">
-              💾 ${I18n.t('save')} All Settings
+              💾 ${I18n.t('s04_save_all_btn')}
             </button>
           </div>
         </div>
@@ -851,17 +933,42 @@ const ScreenS04 = (() => {
     render();
   }
 
+  function toggleSection(secKey) {
+    if (expandedSections[secKey] !== undefined) {
+      expandedSections[secKey] = !expandedSections[secKey];
+      render();
+    }
+  }
+
+  function toggleAllSections(expand) {
+    expandedSections.sec1 = !!expand;
+    expandedSections.sec2 = !!expand;
+    expandedSections.sec3 = !!expand;
+    expandedSections.sec4 = !!expand;
+    render();
+  }
+
+  function setEffectiveType(type) {
+    effectiveDateType = type;
+    render();
+  }
+
+  function setEffectiveDate(val) {
+    effectiveDateVal = val;
+  }
+
   function triggerBatch() {
     const overlay = document.createElement('div');
     overlay.className = 'modal-backdrop flex items-center justify-center';
     overlay.style.zIndex = '9999999';
     overlay.innerHTML = `
-      <div class="card p-6 flex flex-col items-center gap-4 text-center animate-scale-in" style="max-width:340px; border-radius:var(--radius-lg);">
+      <div class="card p-6 flex flex-col items-center gap-4 text-center animate-scale-in" style="max-width:360px; border-radius:var(--radius-lg);">
         <div style="font-size:32px; animation: spin 1.5s linear infinite;">⚙️</div>
         <div>
-          <h4 style="font-weight:700; color:var(--color-primary); margin:0;">Executing BAT-03</h4>
-          <p style="font-size:12px; color:var(--color-outline); margin-top:6px;">
-            Auto-generating slot inventory for next <strong>${bookingWindowDays} days</strong> (${slotIntervalMin}-min intervals, ${slotCapacity} capacity/slot)...
+          <h4 style="font-weight:700; color:var(--color-primary); margin:0;">Executing BAT-03 & BAT-26</h4>
+          <p style="font-size:12px; color:var(--color-outline); margin-top:6px; line-height:1.5;">
+            Auto-recalculating slots for the next <strong>${bookingWindowDays} days</strong> (${slotIntervalMin}-min intervals, ${slotCapacity} capacity/slot)...<br>
+            <span style="color:#15803d; font-weight:600;">Preserving 100% of existing bookings (zero cancellation policy).</span>
           </p>
         </div>
         <div style="width:100%; height:4px; background:var(--color-surface-container); border-radius:2px; overflow:hidden;">
@@ -877,7 +984,7 @@ const ScreenS04 = (() => {
 
     setTimeout(() => {
       overlay.remove();
-      showToast('success', 'Batch Completed', `BAT-03 completed: ${bookingWindowDays}-day slots generated.`);
+      showToast('success', 'Batch Completed', `BAT-26 completed: Slot schedules recalculated with 0 cancellations.`);
     }, 1800);
   }
 
@@ -915,7 +1022,11 @@ const ScreenS04 = (() => {
       isOpen: item.isOpen
     }));
 
-    showToast('success', 'Saved Successfully', 'All 4 sections stored in database. Tomorrow slots updated.');
+    const effectiveNotice = effectiveDateType === 'specific' 
+      ? `Changes scheduled to take effect on ${effectiveDateVal}.` 
+      : 'Changes take effect immediately on upcoming slots.';
+
+    showToast('success', 'Saved Successfully', `Settings saved. ${effectiveNotice}`);
     triggerBatch();
   }
 
@@ -938,6 +1049,10 @@ const ScreenS04 = (() => {
     saveSpecialHour, 
     deleteSpecialHour, 
     setTestRole, 
+    toggleSection,
+    toggleAllSections,
+    setEffectiveType,
+    setEffectiveDate,
     triggerBatch, 
     saveSettings 
   };

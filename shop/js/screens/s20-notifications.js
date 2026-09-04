@@ -143,17 +143,17 @@ const ScreenS20 = (() => {
         <span style="width:7px;height:7px;background:#22c55e;border-radius:50%;
                      box-shadow:0 0 0 0 rgba(34,197,94,0.7);
                      animation:pulse 1.5s infinite;"></span>
-        ${lang === 'mm' ? 'Realtime ချိတ်ဆက်မှု တက်ကြွနေသည်' : 'Realtime Connected (Simulated)'}
+        ${I18n.t('s20_realtime_connected')}
       </span>
     `;
 
     // Filter tabs
     const tabDefs = [
-      { key: 'all',      label: lang === 'mm' ? 'အားလုံး'            : 'All' },
-      { key: 'bookings', label: lang === 'mm' ? 'ဘွတ်ကင်ဆိုင်ရာ'     : 'Bookings' },
-      { key: 'billing',  label: lang === 'mm' ? 'ငွေကြေး / အစီရင်ခံ' : 'Billing & Reports' },
-      { key: 'reviews',  label: lang === 'mm' ? 'သုံးသပ်ချက်'        : 'Reviews' },
-      { key: 'system',   label: lang === 'mm' ? 'စနစ်ကြေညာ'          : 'System' },
+      { key: 'all',      label: I18n.t('s20_tab_all') },
+      { key: 'bookings', label: I18n.t('s20_tab_bookings') },
+      { key: 'billing',  label: I18n.t('s20_tab_billing') },
+      { key: 'reviews',  label: I18n.t('s20_tab_reviews') },
+      { key: 'system',   label: I18n.t('s20_tab_system') },
     ];
 
     const tabsHtml = `
@@ -177,20 +177,18 @@ const ScreenS20 = (() => {
           ${realtimeHtml}
           <span style="font-size:12px;color:var(--color-outline);">
             ${filtered.filter(n => !n.readAt).length > 0
-              ? (lang === 'mm' 
-                  ? `${filtered.filter(n => !n.readAt).length} ခု မဖတ်ရသေး`
-                  : `${filtered.filter(n => !n.readAt).length} unread in this tab`)
-              : (lang === 'mm' ? '✓ ဤ Tab ရှိ အားလုံး ဖတ်ပြီး' : '✓ All read in this tab')}
+              ? I18n.t('s20_unread_in_tab', { count: filtered.filter(n => !n.readAt).length })
+              : I18n.t('s20_all_read_in_tab')}
           </span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-ghost btn-sm" onclick="ScreenS20.simulateNewBookingNotif()" 
-                  title="${lang === 'mm' ? 'Realtime ဘွတ်ကင်အသစ် စမ်းသပ်မည်' : 'Simulate incoming booking notification'}">
-            🔔 ${lang === 'mm' ? 'Realtime စမ်းသပ်' : 'Simulate Realtime'}
+                  title="${I18n.t('s20_simulate_tooltip')}">
+            🔔 ${I18n.t('s20_simulate_realtime')}
           </button>
           ${unread.all > 0 ? `
             <button class="btn btn-secondary btn-sm" onclick="ScreenS20.markAllRead()">
-              ✓ ${lang === 'mm' ? 'အားလုံး ဖတ်ပြီး သတ်မှတ်' : 'Mark All as Read'}
+              ✓ ${I18n.t('s20_mark_all_read')}
             </button>
           ` : ''}
         </div>
@@ -200,8 +198,8 @@ const ScreenS20 = (() => {
     let listHtml = '';
     if (visible.length === 0) {
       listHtml = `<div style="padding:20px;">${Components.emptyState('bell',
-        lang === 'mm' ? 'အကြောင်းကြားချက်မရှိပါ' : 'No notifications',
-        lang === 'mm' ? 'ဤအမျိုးအစားအတွက် အကြောင်းကြားချက် မရှိသေးပါ' : 'No notifications in this category yet.'
+        I18n.t('no_notifications'),
+        I18n.t('s20_no_notifs')
       )}</div>`;
     } else {
       listHtml = `
@@ -209,10 +207,10 @@ const ScreenS20 = (() => {
         <div style="text-align:center;padding:14px;border-top:1px solid var(--color-outline-variant);">
           ${hasMore 
             ? `<button class="btn btn-ghost btn-sm" onclick="ScreenS20.loadMore()">
-                 ${lang === 'mm' ? `နောက်ထပ် ${PAGE_SIZE} ခု တင်မည်` : `Load ${PAGE_SIZE} more`} ↓
+                 ${I18n.t('s20_load_more', { n: PAGE_SIZE })} ↓
                </button>`
             : `<span style="font-size:11.5px;color:var(--color-outline);">
-                 ${lang === 'mm' ? '— ဤ Tab ရှိ အကြောင်းကြားချက်အားလုံး ပြပြီးပါပြီ —' : '— End of notifications in this tab —'}
+                 ${I18n.t('s20_end_of_notifs')}
                </span>`}
         </div>
       `;
@@ -224,26 +222,23 @@ const ScreenS20 = (() => {
                   border:1.5px solid rgba(245,158,11,0.3);border-radius:var(--radius-md);
                   font-size:12px;color:var(--color-on-surface);line-height:1.65;">
         <div style="font-weight:700;margin-bottom:5px;color:#92400e;">
-          📌 ${lang === 'mm' ? 'Developer မှတ်ချက် — Design Document ပြင်ပ Screen' : 'Developer Note — Screen Outside Design Spec'}
+          📌 ${I18n.t('s20_dev_note_title')}
         </div>
         <div style="color:var(--color-outline);">
-          ${lang === 'mm'
-            ? 'ဤမျက်နှာပြင်သည် မူလ 画面設計書 (Design Specification Document) တွင် မပါဝင်ဘဲ ထပ်ဆောင်း တည်ဆောက်ထားသော မျက်နှာပြင်ဖြစ်သည်။ Production တွင် <code>reservation_notifications</code> table (shop_id + channel=in_app) မှ Supabase Realtime subscription ဖြင့် data ရယူမည်ဖြစ်ပြီး Cursor-based pagination (?limit=20&cursor=xxx) ကို အသုံးပြုမည်ဖြစ်သည်။'
-            : 'This screen is NOT in the original 画面設計書 design specification. It is an ADDITIONAL screen. In production, real-time data will be subscribed from the <code>reservation_notifications</code> table (shop_id + channel=\'in_app\') via Supabase Realtime. Pagination uses cursor-based (?limit=20&cursor=xxx) infinite scroll.'
-          }
+          ${I18n.t('s20_dev_note_desc')}
         </div>
       </div>
     `;
 
     const content = `
       ${Components.pageHeader(
-        lang === 'mm' ? 'ဆိုင် အကြောင်းကြားစာ ဗဟိုဌာန' : 'Shop Notification Center',
-        lang === 'mm' ? 'ဘွတ်ကင်ဆိုင်ရာ၊ ငွေကြေး၊ သုံးသပ်ချက်နှင့် စနစ်ကြေညာချက်' : 'Bookings, Billing, Reviews & System Announcements'
+        I18n.t('s20_notification_center'),
+        I18n.t('s20_subtitle')
       )}
 
       <div style="max-width:760px;margin:0 auto;">
         <div class="card p-0" style="border-radius:var(--radius-xl);overflow:hidden;margin-bottom:16px;">
-          <div style="padding:0 20px;">
+          <div style="padding:16px 20px 0;background:var(--color-surface);">
             ${tabsHtml}
             ${toolbarHtml}
           </div>
@@ -257,7 +252,7 @@ const ScreenS20 = (() => {
 
     App.renderAdminPage(
       'shop',
-      lang === 'mm' ? 'အကြောင်းကြားစာ ဗဟိုဌာန' : 'Notification Center',
+      I18n.t('sidebar_shop_notifications'),
       content
     );
   }
@@ -274,11 +269,10 @@ const ScreenS20 = (() => {
   }
 
   function markAllRead() {
-    const lang = I18n.getLang();
     MockData.shopNotifications.forEach(n => { n.readAt = new Date().toISOString(); });
     showToast('success',
-      lang === 'mm' ? 'ဖတ်ပြီးပါပြီ' : 'All Read',
-      lang === 'mm' ? 'အကြောင်းကြားချက်အားလုံး ဖတ်ပြီးအဖြစ် သတ်မှတ်ပြီးပါပြီ' : 'All notifications marked as read.');
+      I18n.t('s20_toast_all_read_title'),
+      I18n.t('s20_toast_all_read_msg'));
     render();
   }
 
@@ -296,7 +290,6 @@ const ScreenS20 = (() => {
 
   // Simulate a Realtime incoming booking notification
   function simulateNewBookingNotif() {
-    const lang = I18n.getLang();
     const names = ['ဦးကျော်ကျော်', 'ဒေါ်သီတာ', 'ကိုမျိုးထွဋ်', 'မမြတ်သူဇာ'];
     const randomName = names[Math.floor(Math.random() * names.length)];
     const guests = Math.floor(Math.random() * 5) + 1;
@@ -317,8 +310,8 @@ const ScreenS20 = (() => {
     });
 
     showToast('info',
-      lang === 'mm' ? '🔔 Realtime ဘွတ်ကင်' : '🔔 Realtime Booking',
-      lang === 'mm' ? `${randomName} ဘွတ်ကင်အသစ် ချက်ချင်းထင်ဟပ်ပြသသည် (Simulated)` : `New booking from ${randomName} appeared instantly (Simulated)`);
+      I18n.t('s20_toast_realtime_title'),
+      I18n.t('s20_toast_realtime_msg', { name: randomName }));
     render();
   }
 

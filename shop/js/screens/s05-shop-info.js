@@ -76,7 +76,7 @@ const ScreenS05 = (() => {
 
     const warningBanner = isStaff ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md); font-weight:600; font-size:13px;">
-        ⚠️ ${lang === 'mm' ? 'ဖတ်ရှုရန်သာ: ဆိုင်ပိုင်ရှင် (Shop Owner) သာ ဆိုင်အချက်အလက်များကို ပြင်ဆင်ခွင့်ရှိသည်။' : 'Read-Only Mode: Only the Shop Owner (shop_owner) can modify settings (C-06).'}
+        ⚠️ ${I18n.t('s05_readonly_owner_warning')}
       </div>
     ` : '';
 

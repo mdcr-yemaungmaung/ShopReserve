@@ -130,7 +130,7 @@ var Components = (() => {
       <div style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; padding:10px 16px; font-size:12.5px; font-weight:700; font-family:'Inter', sans-serif; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 14px rgba(239,68,68,0.25); cursor:pointer; width:100%; text-align:center; position:sticky; top:0; z-index:9999;" onclick="Router.navigate('/user/announcements')">
         <span style="font-size:16px;">🚨</span>
         <span><strong>[SEV1 CRITICAL SYSTEM NOTICE]</strong> ${title}: ${body}</span>
-        <span style="text-decoration:underline; font-size:11.5px; opacity:0.95; margin-left:6px;">${lang === 'mm' ? 'U-19 တွင် အသေးစိတ် ကြည့်မည် →' : 'View Details in U-19 →'}</span>
+        <span style="text-decoration:underline; font-size:11.5px; opacity:0.95; margin-left:6px;">${I18n.t('sev1_view_details')}</span>
       </div>
     `;
   }
@@ -161,11 +161,11 @@ var Components = (() => {
             <div class="dropdown__menu dropdown__menu--right dropdown__menu--notifications">
               <div class="dropdown-notif-header">
                 <span class="dropdown-notif-title">${I18n.t('menu_notifications')}</span>
-                ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.notifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${lang === 'mm' ? 'အားလုံးဖတ်ပြီး' : 'Mark all read'}</button>` : ''}
+                ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.notifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${I18n.t('mark_all_read')}</button>` : ''}
               </div>
               <div class="dropdown-notif-list">
                 ${userNotifs.length === 0 ? `
-                  <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${lang === 'mm' ? 'အကြောင်းကြားချက် မရှိပါ' : 'No notifications'}</div>
+                  <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${I18n.t('no_notifications')}</div>
                 ` : userNotifs.slice(0, 5).map(n => `
                   <div class="dropdown-notif-item ${!n.readAt ? 'unread' : ''}" onclick="Router.navigate('/user/notifications');">
                     <div style="flex:1;">
@@ -177,7 +177,7 @@ var Components = (() => {
                 `).join('')}
               </div>
               <div class="dropdown-notif-footer">
-                <button onclick="Router.navigate('/user/notifications');">${lang === 'mm' ? 'အကြောင်းကြားချက်အားလုံး ကြည့်မည် →' : 'View all notifications →'}</button>
+                <button onclick="Router.navigate('/user/notifications');">${I18n.t('view_all_notifications')}</button>
               </div>
             </div>
           </div>
@@ -457,6 +457,12 @@ var Components = (() => {
         <button class="admin-header__hamburger" onclick="Components.toggleSidebar()" title="Toggle Navigation Menu">
           ${icon('menu')}
         </button>
+        ${portal === 'shop' ? `
+          <div class="admin-header__branch-badge" title="${auth.shopName || 'The Glass Pavilion'}">
+            <span class="material-symbols-outlined admin-header__branch-icon">storefront</span>
+            <span class="admin-header__branch-name">${auth.shopName || 'The Glass Pavilion'}</span>
+          </div>
+        ` : ''}
         <div class="admin-header__search-container">
           <span class="admin-header__search-icon">${icon('search')}</span>
           <input type="text" class="admin-header__search-input" placeholder="Search..." onkeydown="Components.handleHeaderSearch(event, this)" id="header-search-input" />
@@ -476,11 +482,11 @@ var Components = (() => {
           <div class="dropdown__menu dropdown__menu--right dropdown__menu--notifications">
             <div class="dropdown-notif-header">
               <span class="dropdown-notif-title">${I18n.t('menu_notifications')}</span>
-              ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.shopNotifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${lang === 'mm' ? 'အားလုံးဖတ်ပြီး' : (lang === 'ja' ? 'すべて既読' : 'Mark all read')}</button>` : ''}
+              ${unreadCount > 0 ? `<button class="btn btn-ghost btn-xs text-primary" style="font-size:11px;padding:2px 6px;" onclick="MockData.shopNotifications.forEach(n=>n.readAt=new Date().toISOString()); App.render();">${I18n.t('mark_all_read')}</button>` : ''}
             </div>
             <div class="dropdown-notif-list">
               ${shopNotifs.length === 0 ? `
-                <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${lang === 'mm' ? 'အကြောင်းကြားချက် မရှိပါ' : (lang === 'ja' ? '通知はありません' : 'No notifications')}</div>
+                <div style="padding:20px;text-align:center;color:var(--color-outline);font-size:13px;">${I18n.t('no_notifications')}</div>
               ` : shopNotifs.slice(0, 5).map(n => `
                 <div class="dropdown-notif-item ${!n.readAt ? 'unread' : ''}" onclick="Router.navigate('/shop/notifications');">
                   <div style="flex:1;">
@@ -492,7 +498,7 @@ var Components = (() => {
               `).join('')}
             </div>
             <div class="dropdown-notif-footer">
-              <button onclick="Router.navigate('/shop/notifications');">${lang === 'mm' ? 'အကြောင်းကြားချက်အားလုံး ကြည့်မည် (S-20) →' : (lang === 'ja' ? 'すべての通知を表示 (S-20) →' : 'View all notifications (S-20) →')}</button>
+              <button onclick="Router.navigate('/shop/notifications');">${I18n.t('view_all_notifications_s20')}</button>
             </div>
           </div>
         </div>
@@ -527,13 +533,64 @@ var Components = (() => {
     if (overlay) overlay.classList.remove('active');
   }
 
-  // Global keydown handler for Escape key closing drawer & dropdowns
+  // Global keydown handler for Escape key closing modals, drawer & dropdowns (Rule 8 Triple-Exit)
   if (typeof window !== 'undefined' && !window._sidebarEscapeBound) {
     window._sidebarEscapeBound = true;
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        // 1. First priority: Close any nested/topmost sub-modals (e.g. undo no-show modal in s03a)
+        const undoModal = document.getElementById('s03a-undo-modal');
+        if (undoModal) {
+          if (typeof ScreenS03A !== 'undefined' && typeof ScreenS03A.closeUndoNoShowModal === 'function') {
+            ScreenS03A.closeUndoNoShowModal();
+          } else {
+            undoModal.remove();
+          }
+          return;
+        }
+
+        // 2. Priority: S-03A booking details modal
+        const s03aModal = document.getElementById('s03a-detail-modal');
+        if (s03aModal) {
+          if (typeof ScreenS03A !== 'undefined' && typeof ScreenS03A.close === 'function') {
+            ScreenS03A.close();
+          } else {
+            s03aModal.remove();
+          }
+          return;
+        }
+
+        // 3. Priority: S-03B new booking modal
+        const s03bModal = document.getElementById('s03b-new-booking-modal');
+        if (s03bModal) {
+          if (typeof ScreenS03B !== 'undefined' && typeof ScreenS03B.close === 'function') {
+            ScreenS03B.close();
+          } else {
+            s03bModal.remove();
+          }
+          return;
+        }
+
+        // 4. Any other open modal backdrop or dialog (take top-most / last inserted)
+        const activeModals = Array.from(document.querySelectorAll(
+          '.modal-backdrop, [id$="-modal"], .modal-overlay, #confirm-modal, #s01-quick-walkin-modal, #s02-pdf-modal'
+        )).filter(el => el.offsetParent !== null || window.getComputedStyle(el).display !== 'none');
+
+        if (activeModals.length > 0) {
+          const topModal = activeModals[activeModals.length - 1];
+          const closeBtn = topModal.querySelector('.modal__close, .s02-modal__close, [onclick*="remove()"], [onclick*="close()"]');
+          if (closeBtn) {
+            closeBtn.click();
+          } else {
+            topModal.remove();
+          }
+          return;
+        }
+
+        // 5. If no modals were open, close open dropdowns & sidebar drawer
         closeSidebar();
         document.querySelectorAll('.dropdown__menu.open').forEach(menu => menu.classList.remove('open'));
+        document.querySelectorAll('.sidebar-store-menu.open').forEach(menu => menu.classList.remove('open'));
       }
     });
 
@@ -742,9 +799,7 @@ var Components = (() => {
     const lang = I18n.getLang();
     
     // Help hint text
-    const hint = lang === 'mm' 
-      ? 'မြန်မာဖုန်းနံပါတ်ကို ၀၉၊ ၉၊ ၉၅၉ သို့မဟုတ် +၉၅၉ ဖြင့် ထည့်သွင်းနိုင်သည်'
-      : 'Enter Myanmar number starting with 09, 9, 959, or +959';
+    const hint = I18n.t('phone_input_hint');
 
     // Normalize display value to standard local format (09xxxxxxxxx) on load
     let displayVal = val.trim().replace(/[\s\-\(\)]/g, '');

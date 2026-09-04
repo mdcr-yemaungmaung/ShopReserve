@@ -32,9 +32,7 @@ const ScreenS11 = (() => {
     }
 
     // Alphanumeric Password pattern warning
-    const passwordWarning = lang === 'mm' 
-      ? 'စကားဝှက်သည် အနည်းဆုံး ၈ လုံးရှိရမည်ဖြစ်ပြီး အင်္ဂလိပ်စာလုံးနှင့် ကိန်းဂဏန်းများ ပါဝင်ရမည်။' 
-      : 'Password must be at least 8 characters and contain both letters and numbers.';
+    const passwordWarning = I18n.t('password_format_warning');
 
     // Check if 2FA code field is required (Phase 2 or 2FA Active)
     const show2FAField = isPhase2 || twofaEnabled;

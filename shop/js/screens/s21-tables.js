@@ -32,7 +32,6 @@ const ScreenS21 = (() => {
   }
 
   function render() {
-    const lang = I18n.getLang();
     const auth = Router.getAuth();
     const isOwner = auth.role === 'shop_owner';
     const tableList = MockData.tables || [];
@@ -40,7 +39,7 @@ const ScreenS21 = (() => {
     // Role Limit Warning Banner if shop_staff
     const warningBanner = !isOwner ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md); font-weight:600; font-size:13px; border: 1px solid var(--color-error);">
-        🚫 ${lang === 'mm' ? 'ဝင်ရောက်ခွင့် မရှိပါ: စားပွဲစီမံခန့်ခွဲမှုကို ဆိုင်ပိုင်ရှင် (Shop Owner) တစ်ဦးတည်းသာ ဝင်ရောက်ပြင်ဆင်ခွင့် ရှိပါသည်။ (Role Limit: C-07)' : 'Access Restricted: Only the Shop Owner (shop_owner) has permission to modify table master data (C-07).'}
+        🚫 ${I18n.t('s21_restricted_warning')}
       </div>
     ` : '';
 
@@ -58,16 +57,16 @@ const ScreenS21 = (() => {
         <div class="flex justify-between items-center border-bottom pb-3" style="border-bottom:1px solid var(--color-surface-container); flex-wrap:wrap; gap:10px;">
           <div>
             <h3 class="text-label-md" style="font-weight:700; color:var(--color-primary); font-size:16px;">
-              🪑 ${lang === 'mm' ? 'ခုံခွဲ (စားပွဲ) စီမံခန့်ခွဲခြင်း' : 'Table Management (shop_tables)'}
+              🪑 ${I18n.t('s21_title')}
             </h3>
             <p style="font-size:12px; color:var(--color-outline); margin:2px 0 0 0;">
-              ${lang === 'mm' ? 'စားပွဲဝိုင်း အမည်၊ ဆံ့ဝင်လူဦးရေ၊ စားပွဲ လက္ခဏာ Tag (seat_attribute) နှင့် အသက်ဝင်များ (active) ကို သတ်မှတ်ပါ' : 'Register table name, capacity, seat attribute tags (seat_attribute), and active flag.'}
+              ${I18n.t('s21_subtitle')}
             </p>
           </div>
           ${isOwner ? `
             <button class="btn btn-primary btn-sm" onclick="ScreenS21.openTableModal()">
               <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
-              ${lang === 'mm' ? 'စားပွဲ အသစ်ထည့်မည်' : 'Add New Table'}
+              ${I18n.t('s21_add_table')}
             </button>
           ` : ''}
         </div>
@@ -75,11 +74,11 @@ const ScreenS21 = (() => {
         <!-- Seat Attribute Tags Overview Banner -->
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:4px;">
           <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            🏷️ ${lang === 'mm' ? 'စနစ်တွင်း သတ်မှတ်ထားသော စားပွဲ Tag များ (Seat Attribute Library):' : 'Available Seat Attribute Tags (seat_attribute library):'}
+            🏷️ ${I18n.t('s21_seat_tags_library')}
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
             ${SEAT_TAG_DEFINITIONS.map(t => {
-              const tagLabel = lang === 'mm' ? t.label_mm : t.label_en;
+              const tagLabel = I18n.getSeatTagLabel(t.code);
               const isSelected = selectedTagFilter === t.code;
               return `
                 <button type="button" onclick="ScreenS21.setTagFilter('${t.code}')" style="display:flex; align-items:center; gap:4px; padding:4px 10px; border-radius:16px; font-size:11.5px; font-weight:600; border:1px solid ${isSelected ? t.color : '#cbd5e1'}; background:${isSelected ? t.bg : '#ffffff'}; color:${isSelected ? t.color : '#334155'}; cursor:pointer;">
@@ -90,7 +89,7 @@ const ScreenS21 = (() => {
             }).join('')}
             ${selectedTagFilter !== 'all' ? `
               <button type="button" onclick="ScreenS21.setTagFilter('all')" style="padding:4px 10px; border-radius:16px; font-size:11.5px; font-weight:600; border:1px solid #cbd5e1; background:#e2e8f0; color:#334155; cursor:pointer;">
-                ✕ Clear Filter
+                ✕ ${I18n.t('s21_clear_filter')}
               </button>
             ` : ''}
           </div>
@@ -100,10 +99,10 @@ const ScreenS21 = (() => {
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:4px;">
           <div style="position:relative; flex:1; max-width:320px;">
             <span class="material-symbols-outlined" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:18px; color:#94a3b8;">search</span>
-            <input type="text" placeholder="${lang === 'mm' ? 'စားပွဲအမည် ဖြင့် ရှာမည်...' : 'Search tables...'}" value="${tableSearchQuery}" oninput="ScreenS21.handleSearch(this.value)" style="width:100%; height:36px; padding-left:34px; padding-right:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none;" />
+            <input type="text" placeholder="${I18n.t('s21_search_placeholder')}" value="${tableSearchQuery}" oninput="ScreenS21.handleSearch(this.value)" style="width:100%; height:36px; padding-left:34px; padding-right:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none;" />
           </div>
           <span style="font-size:12px; color:#64748b; font-weight:600;">
-            ${lang === 'mm' ? `စားပွဲ စုစုပေါင်း: ${filteredTables.length} ခု` : `Showing ${filteredTables.length} tables`}
+            ${I18n.t('s21_showing_tables', { count: filteredTables.length })}
           </span>
         </div>
 
@@ -120,11 +119,11 @@ const ScreenS21 = (() => {
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                     <span style="font-weight:700; font-size:15px; color:var(--color-primary);">${tb.name}</span>
                     <span class="badge ${isActive ? 'badge--success' : 'badge--expired'}" style="font-size:11px; font-weight:700;">
-                      ${isActive ? (lang === 'mm' ? 'အသက်ဝင်သည်' : 'Active') : (lang === 'mm' ? 'ရပ်ထားသည်' : 'Inactive')}
+                      ${isActive ? I18n.t('s21_active') : I18n.t('s21_inactive')}
                     </span>
                   </div>
                   <div style="font-size:12px; color:#64748b; font-weight:500; margin-bottom:8px;">
-                    📍 ${tb.type || 'Main Hall'} · ${tb.seats || tb.capacity || 4} ${lang === 'mm' ? 'ခုံ' : 'seats'}
+                    📍 ${tb.type || 'Main Hall'} · ${tb.seats || tb.capacity || 4} ${I18n.t('s09_table_seats_unit')}
                   </div>
 
                   <!-- Table Seat Attribute Tags -->
@@ -134,7 +133,7 @@ const ScreenS21 = (() => {
                       return `
                         <span style="display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:12px; font-size:10.5px; font-weight:600; background:${meta.bg}; color:${meta.color}; border:1px solid ${meta.color}40;">
                           <span class="material-symbols-outlined" style="font-size:12px;">${meta.icon}</span>
-                          ${lang === 'mm' ? meta.label_mm : meta.label_en}
+                          ${I18n.getSeatTagLabel(tagCode)}
                         </span>
                       `;
                     }).join('') : `<span style="font-size:11px; color:#94a3b8; font-style:italic;">No Tags</span>`}
@@ -147,10 +146,10 @@ const ScreenS21 = (() => {
                       <span class="material-symbols-outlined" style="font-size:14px;">power_settings_new</span> ${isActive ? 'Disable' : 'Enable'}
                     </button>
                     <button class="btn btn-ghost btn-sm" style="padding:2px 8px; font-size:11.5px;" onclick="ScreenS21.openTableModal(${realIdx})">
-                      <span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit
+                      <span class="material-symbols-outlined" style="font-size:14px;">edit</span> ${I18n.t('edit')}
                     </button>
                     <button class="btn btn-ghost btn-sm" style="color:var(--color-error); padding:2px 8px; font-size:11.5px;" onclick="ScreenS21.deleteTable(${realIdx})">
-                      ✕ Delete
+                      ✕ ${I18n.t('delete')}
                     </button>
                   </div>
                 ` : ''}
@@ -162,8 +161,8 @@ const ScreenS21 = (() => {
       </div>
     `;
 
-    App.renderAdminPage('shop', lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု' : 'Table Management', `
-      ${Components.pageHeader(lang === 'mm' ? 'စားပွဲစီမံခန့်ခွဲမှု' : 'Table Management', lang === 'mm' ? 'shop_tables ခုံခွဲများနှင့် seat_attribute Tag များ စီမံရန် (C-07)' : 'Manage table master data and seat attribute tags (shop_tables / C-07).')}
+    App.renderAdminPage('shop', I18n.t('table_management'), `
+      ${Components.pageHeader(I18n.t('table_management'), I18n.t('s21_subtitle'))}
       ${warningBanner}
       ${content}
     `);
@@ -183,14 +182,16 @@ const ScreenS21 = (() => {
     const tb = MockData.tables[idx];
     if (tb) {
       tb.is_active = tb.is_active === false;
-      showToast('info', 'Table Updated', `${tb.name} is now ${tb.is_active === false ? 'inactive' : 'active'}.`);
+      showToast('info', I18n.t('s21_table_updated'), I18n.t('s21_table_updated_desc', {
+        name: tb.name,
+        status: tb.is_active === false ? I18n.t('s21_inactive') : I18n.t('s21_active')
+      }));
       render();
     }
   }
 
   // --- TABLE MODAL (Add / Edit) ---
   function openTableModal(editIdx = null) {
-    const lang = I18n.getLang();
     const tableList = MockData.tables || [];
     const editTable = editIdx !== null ? tableList[editIdx] : null;
     const existingTags = editTable ? (editTable.seat_tags || []) : [];
@@ -200,7 +201,7 @@ const ScreenS21 = (() => {
         <div class="modal modal--md animate-scale-in" onclick="event.stopPropagation()">
           <div class="modal__header">
             <h3 class="modal__title">
-              ${editTable ? (lang === 'mm' ? 'စားပွဲဝိုင်း ပြင်ဆင်ရန်' : 'Edit Table & Seat Tags') : (lang === 'mm' ? 'စားပွဲဝိုင်း အသစ်ထည့်ရန်' : 'Add New Table')}
+              ${editTable ? I18n.t('s21_edit_table') : I18n.t('s21_add_table')}
             </h3>
             <button class="modal__close" onclick="document.getElementById('table-modal').remove()">✕</button>
           </div>
@@ -213,13 +214,13 @@ const ScreenS21 = (() => {
                 <input type="text" class="form-input" id="tb-name" value="${editTable ? editTable.name : ''}" placeholder="e.g. T-41 / VIP-11" required>
               </div>
               <div class="form-group mb-0">
-                <label class="form-label">${lang === 'mm' ? 'ဆံ့ဝင်လူဦးရေ (Capacity)' : 'Seats / Capacity'} <span class="text-error">*</span></label>
+                <label class="form-label">${I18n.t('s21_capacity_label')} <span class="text-error">*</span></label>
                 <input type="number" class="form-input" id="tb-seats" value="${editTable ? (editTable.seats || editTable.capacity || 4) : 4}" min="1" max="50" required>
               </div>
             </div>
 
             <div class="form-group mb-0">
-              <label class="form-label">${lang === 'mm' ? 'စားပွဲ နေရာ ဧရိယာ (Section/Type)' : 'Table Section / Type'}</label>
+              <label class="form-label">${I18n.t('s21_type_label')}</label>
               <select class="form-select" id="tb-type">
                 <option value="Main Hall" ${editTable && editTable.type === 'Main Hall' ? 'selected' : ''}>Main Hall</option>
                 <option value="Window View" ${editTable && editTable.type === 'Window View' ? 'selected' : ''}>Window View</option>
@@ -234,17 +235,17 @@ const ScreenS21 = (() => {
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px;">
               <div>
                 <label style="font-size:13px; font-weight:700; color:#0f172a; display:block;">
-                  🏷️ ${lang === 'mm' ? 'စားပွဲ လက္ခဏာ Tag များ (seat_attribute)' : 'Seat Attribute Tags (seat_attribute)'}
+                  🏷️ ${I18n.t('s21_tags_title')}
                 </label>
                 <p style="font-size:11.5px; color:#64748b; margin:2px 0 0 0;">
-                  ${lang === 'mm' ? 'ဧည့်သည်များ ဘွတ်ကင်လုပ်ချိန်တွင် စိတ်ကြိုက် ရွေးချယ်နိုင်သော စားပွဲလက္ခဏာများကို သတ်မှတ်ပေးပါ' : 'Select all matching seat tags for client booking request alignment.'}
+                  ${I18n.t('s21_tags_hint')}
                 </p>
               </div>
 
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="tb-tag-checkboxes">
                 ${SEAT_TAG_DEFINITIONS.map(t => {
                   const checked = existingTags.includes(t.code);
-                  const label = lang === 'mm' ? t.label_mm : t.label_en;
+                  const label = I18n.getSeatTagLabel(t.code);
                   return `
                     <label style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; border:1px solid ${checked ? t.color : 'rgba(15,76,92,0.14)'}; background:${checked ? t.bg : '#f4f8fa'}; cursor:pointer; font-size:12px; font-weight:600; color:${checked ? t.color : '#334155'}; transition:all 0.15s;">
                       <input type="checkbox" value="${t.code}" ${checked ? 'checked' : ''} style="width:16px; height:16px; cursor:pointer;" />
@@ -257,10 +258,10 @@ const ScreenS21 = (() => {
             </div>
 
             <div class="form-group mb-0">
-              <label class="form-label">${lang === 'mm' ? 'အသက်ဝင်မှု (Active flag)' : 'Active Flag'}</label>
+              <label class="form-label">${I18n.t('s21_active_flag')}</label>
               <select class="form-select" id="tb-active">
-                <option value="true" ${!editTable || editTable.is_active !== false ? 'selected' : ''}>Active</option>
-                <option value="false" ${editTable && editTable.is_active === false ? 'selected' : ''}>Inactive (closed for booking)</option>
+                <option value="true" ${!editTable || editTable.is_active !== false ? 'selected' : ''}>${I18n.t('s21_active')}</option>
+                <option value="false" ${editTable && editTable.is_active === false ? 'selected' : ''}>${I18n.t('s21_inactive_closed')}</option>
               </select>
             </div>
 
@@ -289,7 +290,7 @@ const ScreenS21 = (() => {
     const selectedTags = Array.from(checkboxes).map(cb => cb.value);
 
     if(!name || !seats) {
-      showToast('error', 'Error', 'Please fill table name and capacity.');
+      showToast('error', I18n.t('error') || 'Error', I18n.t('s21_validation_error'));
       return;
     }
 
@@ -301,7 +302,7 @@ const ScreenS21 = (() => {
       target.type = type;
       target.seat_tags = selectedTags;
       target.is_active = isActive;
-      showToast('success', 'Updated', `Table ${name} and seat tags updated.`);
+      showToast('success', I18n.t('s21_table_updated'), `${name} (${selectedTags.length} tags)`);
     } else {
       MockData.tables.push({
         id: `tbl-${Date.now()}`,
@@ -312,7 +313,7 @@ const ScreenS21 = (() => {
         seat_tags: selectedTags,
         is_active: isActive
       });
-      showToast('success', 'Created', `Table ${name} registered with ${selectedTags.length} seat tags.`);
+      showToast('success', I18n.t('s21_table_updated'), `${name} (${selectedTags.length} tags)`);
     }
 
     document.getElementById('table-modal').remove();

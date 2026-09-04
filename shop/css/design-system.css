@@ -6,14 +6,32 @@
 /* --- CSS Reset --- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; max-width: 100vw; }
-body { font-family: 'Inter', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; color: var(--color-on-surface); background: var(--color-bg); line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; max-width: 100vw; width: 100%; }
+body { font-family: 'Inter', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; color: var(--color-on-surface); background: var(--color-bg); line-height: 1.55; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; max-width: 100vw; width: 100%; font-size: 16px; }
 img, picture, video, canvas, svg { display: block; max-width: 100%; }
 input, button, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; border: none; background: none; }
 a { color: inherit; text-decoration: none; }
 ul, ol { list-style: none; }
 table { border-collapse: collapse; width: 100%; }
-h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; font-weight: 600; line-height: 1.25; }
+
+/* --- Master Typography Scale (Section 14) --- */
+h1, .text-h1 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.25; letter-spacing: -0.01em; }
+h2, .text-h2 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.30; }
+h3, .text-h3 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; font-weight: 600; font-size: 16px; line-height: 1.35; }
+h4, h5, h6 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', 'Myanmar3', sans-serif; font-weight: 600; line-height: 1.40; }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  h1, .text-h1 { font-size: 26px; line-height: 1.30; }
+  h2, .text-h2 { font-size: 19px; line-height: 1.35; }
+  h3, .text-h3 { font-size: 15px; line-height: 1.40; }
+}
+
+@media (max-width: 767px) {
+  body { font-size: 15px; line-height: 1.55; }
+  h1, .text-h1 { font-size: 22px; line-height: 1.35; }
+  h2, .text-h2 { font-size: 17px; line-height: 1.40; }
+  h3, .text-h3 { font-size: 15px; line-height: 1.45; }
+}
 
 /* --- Design Tokens (CSS Custom Properties) --- */
 :root {
@@ -92,6 +110,38 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', 'Padauk', 'Noto Sans Myanmar', '
   --color-outline-variant: #E2E8F0;
   --color-inverse-surface: #0B1220;
   --color-inverse-on-surface: #F8FAFC;
+
+  /* === Section 14 Cross-Device Master Tokens === */
+  /* Gutter / Page Inset */
+  --gutter-mobile: 16px;
+  --gutter-tablet: 24px;
+  --gutter-desktop: 32px;
+  --container-max-width: 1280px;
+
+  /* Card Internal Padding */
+  --card-padding-mobile: 16px;
+  --card-padding-tablet: 20px;
+  --card-padding-desktop: 24px;
+
+  /* Vertical Section Rhythm */
+  --section-gap-mobile: 20px;
+  --section-gap-tablet: 28px;
+  --section-gap-desktop: 36px;
+
+  /* Safe Line Heights (Burmese / Japanese diacritic preservation) */
+  --lh-tight: 1.25;
+  --lh-h1: 1.25;
+  --lh-h2: 1.30;
+  --lh-h3: 1.35;
+  --lh-body: 1.55;
+  --lh-caption: 1.50;
+  --lh-badge: 1.20;
+
+  /* Density & Dimensions */
+  --table-row-desktop: 38px;
+  --table-row-tablet: 48px;
+  --table-row-mobile: 52px;
+  --target-touch-min: 44px;
 
   /* === Typography === */
   --font-headline: 'Outfit', 'Padauk', 'Noto Sans Myanmar', 'Pyidaungsu', sans-serif;
@@ -391,11 +441,11 @@ button:active:not(:disabled),
 
 .stitch-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 18px 20px;
+  border-radius: 14px;
+  padding: var(--card-padding-desktop, 24px);
   border: 1px solid rgba(15, 76, 92, 0.15);
   box-shadow: 0 2px 8px rgba(15, 76, 92, 0.05);
-  margin-bottom: 16px;
+  margin-bottom: var(--section-gap-tablet, 28px);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -413,22 +463,30 @@ button:active:not(:disabled),
   background: linear-gradient(145deg, #fbfcfe 0%, #f3f7fa 100%);
   border: 1px solid rgba(15,76,92,0.12);
   box-shadow: 0 2px 6px rgba(15,76,92,0.03);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: var(--card-padding-tablet, 20px);
   margin-top: 16px;
 }
 
-/* Tablet View (768px - 1024px): Retain Segmented Cards */
-@media (min-width: 768px) and (max-width: 1024px) {
+/* Tablet View (768px - 1023px): Retain Segmented Cards with 20px Padding */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .stitch-card:not(.modal *),
   #s09-screen .stitch-card,
-  #s09-form .stitch-card,
-  #s03b-screen .stitch-card {
+  #s09-form .stitch-card {
     background: #ffffff !important;
     border: 1px solid rgba(15, 76, 92, 0.15) !important;
     box-shadow: 0 2px 8px rgba(15, 76, 92, 0.05) !important;
-    border-radius: 14px !important;
-    padding: 16px !important;
-    margin-bottom: 16px !important;
+    border-radius: 12px !important;
+    padding: var(--card-padding-tablet, 20px) !important;
+    margin-bottom: var(--section-gap-tablet, 28px) !important;
+  }
+
+  /* Compact card padding inside modals on tablet */
+  .modal .stitch-card,
+  #s03a-booking-modal .stitch-card,
+  #s03b-new-booking-modal .stitch-card {
+    padding: 14px 16px !important;
+    border-radius: 12px !important;
   }
 
   #s09-screen #s09-calendar-wrapper > div,
@@ -436,22 +494,50 @@ button:active:not(:disabled),
     background: #ffffff !important;
     border: 1px solid rgba(15, 76, 92, 0.12) !important;
     box-shadow: 0 1px 4px rgba(15, 76, 92, 0.03) !important;
-    border-radius: 14px !important;
-    padding: 12px !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
   }
 }
 
-/* Mobile View (< 768px): Borderless Sections with Subtle Hairline Dividers (1px solid #E2E8F0) & No Floating Buttons */
+/* Compact card padding inside modals on desktop */
+.modal .stitch-card,
+#s03a-booking-modal .stitch-card,
+#s03b-new-booking-modal .stitch-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+/* Mobile View (< 768px): Borderless Sections with Subtle Hairline Dividers for Page Screens */
 @media (max-width: 767px) {
   #s09-screen .stitch-card,
-  #s09-form .stitch-card {
+  #s09-form .stitch-card,
+  .stitch-screen-form .stitch-card {
     background: transparent !important;
     border: none !important;
     border-bottom: 1px solid #E2E8F0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 0 0 22px 0 !important;
-    margin-bottom: 22px !important;
+    padding: 0 0 var(--section-gap-mobile, 20px) 0 !important;
+    margin-bottom: var(--section-gap-mobile, 20px) !important;
+  }
+
+  /* Modal cards on mobile: Retain solid white card background, subtle border, and compact padding */
+  .modal .stitch-card,
+  #s03a-booking-modal .stitch-card,
+  #s03b-new-booking-modal .stitch-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 76, 92, 0.15) !important;
+    box-shadow: 0 1px 4px rgba(15, 76, 92, 0.04) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  /* Preserve warning / audit alert card background on mobile */
+  #s03a-booking-modal .stitch-card[style*="FEF3C7"],
+  #s03a-booking-modal .stitch-card[style*="background: #FEF3C7"],
+  .stitch-card--warning {
+    background: #FEF3C7 !important;
+    border: 1px solid #FCD34D !important;
   }
 
   /* Remove bottom divider from the last card in the column */
@@ -690,10 +776,11 @@ button.stitch-btn-inactive {
 }
 
 .stitch-time-slot {
-  height: 42px;
+  height: 44px;
+  min-height: 44px;
   border-radius: 10px;
   border: 1px solid #CBD5E1;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -720,8 +807,10 @@ button.stitch-btn-inactive {
 }
 
 .stitch-stepper-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   border: 1px solid var(--color-outline-variant, #c7c5d0);
   background: #f4f8fa;

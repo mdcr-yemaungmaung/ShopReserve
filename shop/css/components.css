@@ -770,10 +770,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   color: #111827;
 }
 .modal__close {
-  min-width: 38px;
-  min-height: 38px;
-  width: 38px;
-  height: 38px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -809,19 +809,155 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   background: #F8FAFC;
   flex-wrap: wrap;
 }
-@media (max-width: 640px) {
-  .modal {
-    max-height: 95vh;
-    border-radius: var(--radius-lg);
+/* S03A & S03B Modal Sheets */
+.s03a-sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  position: relative;
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(11, 18, 32, 0.1));
+  background: linear-gradient(180deg, #fbfcfe 0%, #f3f7fa 100%);
+  border: 1px solid rgba(15, 76, 92, 0.14);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.s03b-modal-sheet {
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #fbfcfe 0%, #f0f4f7 100%);
+  border: 1px solid rgba(15, 76, 92, 0.14);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(15, 76, 92, 0.15);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.s03b-modal-footer {
+  border-top: 1px solid rgba(15, 76, 92, 0.1);
+  padding-top: 14px;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.s03b-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.s03b-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.s03b-footer-btn {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   MOBILE ADAPTIVE SHEET DRAWER (< 768px) - Rule 8 & Matrix
+   ========================================================= */
+@media (max-width: 767px) {
+  .modal-backdrop,
+  .s03a-modal-backdrop,
+  .s03b-modal-backdrop,
+  .s01-walkin-backdrop,
+  .s03a-undo-backdrop {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .modal,
+  #s03a-modal-shell,
+  #s03b-screen,
+  #s01-quick-walkin-modal > .card,
+  #s03a-undo-modal > .card,
+  .s03a-sheet,
+  .s03b-modal-sheet,
+  .s01-walkin-sheet,
+  .s03a-undo-sheet {
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 92vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.2) !important;
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom, 20px)) !important;
+  }
+  .modal__header {
+    padding: var(--space-4) var(--space-5);
+  }
+  .modal__body {
+    padding: var(--space-4) var(--space-5);
+    max-height: calc(92vh - 140px);
   }
   .modal__footer {
     flex-direction: column-reverse;
     align-items: stretch;
     gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
   }
   .modal__footer .btn {
     width: 100%;
     min-height: 48px;
+  }
+  .modal__close {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .s03b-modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .s03b-footer-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 10px;
+  }
+  .s03b-footer-actions .s03b-footer-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+  .s01-walkin-actions {
+    flex-direction: column-reverse !important;
+    width: 100% !important;
+  }
+  .s01-walkin-actions .btn {
+    width: 100% !important;
+    flex: none !important;
+    min-height: 48px !important;
   }
 }
 
@@ -3612,6 +3748,159 @@ body.screen-s01-s02-theme .s02-modal__header,
   border-color: #EF4444 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25), 0 4px 12px rgba(239, 68, 68, 0.12) !important;
   background: #FFFDFD !important;
+}
+
+/* =========================================================
+   S-04 OPEN SLOT SETTINGS (RESPONSIVE ACCORDION & LAYOUT)
+   ========================================================= */
+.s04-accordion-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  transition: box-shadow var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease);
+}
+.s04-accordion-item:focus-within {
+  border-color: var(--color-primary);
+}
+.s04-accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  gap: 12px;
+  border-bottom: 1px solid transparent;
+  transition: background var(--transition-fast, 0.2s ease), border-color var(--transition-fast, 0.2s ease);
+}
+.s04-accordion-header:hover {
+  background: var(--color-surface-container-low);
+}
+.s04-accordion-item.is-expanded .s04-accordion-header {
+  border-bottom-color: var(--color-outline-variant);
+  background: var(--color-surface-container-lowest, #ffffff);
+}
+.s04-accordion-header__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.s04-accordion-header__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-primary-container, #e0f2fe);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.s04-accordion-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.s04-accordion-header__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+.s04-accordion-header__desc {
+  font-size: 12px;
+  color: var(--color-on-surface-variant);
+  line-height: 1.5;
+}
+.s04-accordion-header__chevron {
+  font-size: 20px;
+  color: var(--color-outline);
+  transition: transform var(--transition-fast, 0.2s ease);
+  flex-shrink: 0;
+}
+.s04-accordion-item.is-expanded .s04-accordion-header__chevron {
+  transform: rotate(180deg);
+}
+.s04-accordion-body {
+  padding: 20px;
+  display: none;
+  background: var(--color-surface);
+}
+.s04-accordion-item.is-expanded .s04-accordion-body {
+  display: block;
+}
+
+/* Effective date banner */
+.s04-effective-card {
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md, 8px);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.s04-effective-options {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.s04-effective-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+/* BAT-26 and protection callout card */
+.s04-protection-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md, 8px);
+  padding: 14px 18px;
+  color: #166534;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .s04-accordion-header {
+    padding: 14px 14px;
+  }
+  .s04-accordion-body {
+    padding: 14px 12px;
+  }
+  .s04-accordion-header__title {
+    font-size: 14px;
+  }
+  .s04-accordion-header__desc {
+    font-size: 11px;
+  }
+  .availability-time-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .availability-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 

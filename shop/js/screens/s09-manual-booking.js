@@ -71,7 +71,6 @@ const ScreenS09 = (() => {
   }
 
   function renderTableSelectHtml(selectedTableValue = '') {
-    const lang = I18n.getLang();
     const filtered = getFilteredTables();
     
     // Option C: check if currently selected table is in filtered list
@@ -81,35 +80,30 @@ const ScreenS09 = (() => {
     let optionsHtml = '';
     if (filtered.length > 0) {
       const autoLabel = selectedSeatTags.length > 0
-        ? (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ကိုက်ညီ)` : `Auto Assign (${filtered.length} matching tables)`)
-        : (lang === 'mm' ? `စနစ်မှ အလိုအလျောက် သတ်မှတ်မည် (${filtered.length} ဝိုင်း ရနိုင်)` : `Auto Assign (${filtered.length} available tables)`);
+        ? I18n.t('s09_auto_assign_matching', { count: String(filtered.length) })
+        : I18n.t('s09_auto_assign_available', { count: String(filtered.length) });
       optionsHtml = `<option value="">${autoLabel}</option>` + 
-        filtered.map(t => `<option value="${t.name}" ${t.name === currentVal ? 'selected' : ''}>${t.name} (${t.seats} ${lang === 'mm' ? 'ခုံ' : 'seats'} · ${t.type})</option>`).join('');
+        filtered.map(t => `<option value="${t.name}" ${t.name === currentVal ? 'selected' : ''}>${t.name} (${t.seats} ${I18n.t('s09_table_seats_unit')} · ${t.type})</option>`).join('');
     } else {
-      optionsHtml = `<option value="" disabled selected>${lang === 'mm' ? '⚠️ ကိုက်ညီသော စားပွဲ မရှိပါ' : '⚠️ No matching tables'}</option>`;
+      optionsHtml = `<option value="" disabled selected>⚠️ ${I18n.t('s09_no_matching_table')}</option>`;
     }
 
-    const activePrefNames = selectedSeatTags.map(c => {
-      const tag = tableTags.find(t => t.code === c);
-      return tag ? (lang === 'mm' ? tag.name_mm : tag.name) : c;
-    }).join(', ');
+    const activePrefNames = selectedSeatTags.map(c => I18n.getSeatTagLabel(c)).join(', ');
 
     const noMatchWarningHtml = filtered.length === 0
       ? `
         <div id="s09-no-table-warning" style="display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; margin-top: 6px; font-size: 12px; color: #991B1B;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #DC2626; flex-shrink: 0; margin-top: 1px;">warning</span>
           <div>
-            <strong>${lang === 'mm' ? 'ကိုက်ညီသော စားပွဲ မရှိပါ:' : 'No matching tables found:'}</strong> 
-            ${lang === 'mm' 
-              ? `ဧည့်သည် ${guestCount} ဦး နှင့် ${activePrefNames ? `[${activePrefNames}]` : ''} အတွက် သင့်တော်သော စားပွဲ မရှိပါ။ ဧည့်သည် ဦးရေ လျှော့ချပါ သို့မဟုတ် Preference ဖျက်ပါ။` 
-              : `No tables with capacity ≥ ${guestCount} match ${activePrefNames ? `[${activePrefNames}]` : 'criteria'}. Try clearing preference or reducing guest count.`}
+            <strong>${I18n.t('s09_no_matching_warning_title')}</strong> 
+            ${I18n.t('s09_no_matching_warning_desc', { guestCount: String(guestCount), criteria: activePrefNames ? `[${activePrefNames}]` : 'criteria' })}
           </div>
         </div>
       `
       : `
         <div id="s09-table-filter-hint" style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #64748B;">
-          <span>${lang === 'mm' ? `ဧည့်သည် ${guestCount} ဦး နှင့် ကိုက်ညီသော စားပွဲ ${filtered.length} ခု တွေ့ရှိသည်` : `Filtered by ${guestCount} guests${selectedSeatTags.length > 0 ? ` & ${activePrefNames}` : ''} (${filtered.length} tables)`}</span>
-          ${selectedSeatTags.length > 0 ? `<button type="button" onclick="ScreenS09.clearSeatPreferences()" style="background: none; border: none; color: #0F4C5C; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">${lang === 'mm' ? 'Clear Filter' : 'Clear Filter'}</button>` : ''}
+          <span>${I18n.t('s09_filtered_tables_hint', { guestCount: String(guestCount), prefs: selectedSeatTags.length > 0 ? ` & ${activePrefNames}` : '', count: String(filtered.length) })}</span>
+          ${selectedSeatTags.length > 0 ? `<button type="button" onclick="ScreenS09.clearSeatPreferences()" style="background: none; border: none; color: #0F4C5C; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">${I18n.t('s09_clear_filter')}</button>` : ''}
         </div>
       `;
 
@@ -147,51 +141,30 @@ const ScreenS09 = (() => {
 
   const timeSlots = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'];
 
-  function getDateStatus(isoDate, lang) {
+  function getDateStatus(isoDate) {
     const parts = isoDate.split('-').map(n => parseInt(n, 10));
     const d = new Date(parts[0], parts[1] - 1, parts[2]);
     const dayOfWeek = d.getDay();
     const dayNum = d.getDate();
 
     if (dayOfWeek === 0) {
-      return { status: 'closed', label: lang === 'mm' ? 'ပိတ်' : 'Closed', dotColor: '#9ca3af', bg: '#f3f4f6', color: '#6b7280' };
+      return { status: 'closed', label: I18n.t('date_status_closed'), dotColor: '#9ca3af', bg: '#f3f4f6', color: '#6b7280' };
     }
     if (dayNum === 10 || dayNum === 24) {
-      return { status: 'full', label: lang === 'mm' ? 'အပြည့်' : 'Full', dotColor: '#ef4444', bg: '#fee2e2', color: '#991b1b' };
+      return { status: 'full', label: I18n.t('date_status_full'), dotColor: '#ef4444', bg: '#fee2e2', color: '#991b1b' };
     }
     if (dayOfWeek === 6 || dayNum === 7 || dayNum === 14) {
-      return { status: 'limited', label: lang === 'mm' ? 'အကန့်အသတ်' : 'Limited', dotColor: '#D8902F', bg: '#fbead1', color: '#854d0e' };
+      return { status: 'limited', label: I18n.t('date_status_limited'), dotColor: '#D8902F', bg: '#fbead1', color: '#854d0e' };
     }
-    return { status: 'available', label: lang === 'mm' ? 'ဖွင့်' : 'Available', dotColor: '#0F4C5C', bg: '#d0e6ec', color: '#0F4C5C' };
+    return { status: 'available', label: I18n.t('date_status_available'), dotColor: '#0F4C5C', bg: '#d0e6ec', color: '#0F4C5C' };
   }
 
-  function getFullDisplay(isoDate, lang) {
-    const parts = isoDate.split('-').map(n => parseInt(n, 10));
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    const weekdayNames = lang === 'mm'
-      ? ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ']
-      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const monthNames = lang === 'mm'
-      ? ['ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်', 'ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ']
-      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-    const dayLabel = weekdayNames[d.getDay()];
-    const monthLabel = monthNames[d.getMonth()];
-    const dayNum = String(d.getDate()).padStart(2, '0');
-
-    return lang === 'mm'
-      ? `${dayLabel}၊ ${monthLabel} ${dayNum}`
-      : `${dayLabel}, ${monthLabel} ${dayNum}`;
+  function getFullDisplay(isoDate) {
+    return I18n.formatFullDate(isoDate);
   }
 
   function renderMonthCalendarHtml() {
-    const lang = I18n.getLang();
-    const monthNames = lang === 'mm'
-      ? ['ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ', 'ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်']
-      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-    const actualMonthIndex = currentViewMonth;
-    const monthTitle = `${monthNames[actualMonthIndex]} ${currentViewYear}`;
+    const monthTitle = I18n.formatMonthYear(currentViewYear, currentViewMonth);
 
     const firstDayOfWeek = new Date(currentViewYear, currentViewMonth, 1).getDay();
     const totalDaysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate();
@@ -205,7 +178,7 @@ const ScreenS09 = (() => {
 
     for (let day = 1; day <= totalDaysInMonth; day++) {
       const isoDate = `${currentViewYear}-${String(currentViewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const status = getDateStatus(isoDate, lang);
+      const status = getDateStatus(isoDate);
       const isSelected = isoDate === selectedIsoDate;
       const isPast = isoDate < todayStr;
 
@@ -245,13 +218,13 @@ const ScreenS09 = (() => {
 
         <!-- 7 Column Weekday Header -->
         <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; font-weight: 600; color: #46464f; margin-bottom: 6px;">
-          <span>Sun</span>
-          <span>Mon</span>
-          <span>Tue</span>
-          <span>Wed</span>
-          <span>Thu</span>
-          <span>Fri</span>
-          <span>Sat</span>
+          <span>${I18n.formatWeekday(0, true)}</span>
+          <span>${I18n.formatWeekday(1, true)}</span>
+          <span>${I18n.formatWeekday(2, true)}</span>
+          <span>${I18n.formatWeekday(3, true)}</span>
+          <span>${I18n.formatWeekday(4, true)}</span>
+          <span>${I18n.formatWeekday(5, true)}</span>
+          <span>${I18n.formatWeekday(6, true)}</span>
         </div>
 
         <!-- Days Grid -->
@@ -263,19 +236,19 @@ const ScreenS09 = (() => {
         <div style="display: flex; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f1f2; font-size: 11px; font-weight: 500; color: #46464f; justify-content: center; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 4px;">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #0F4C5C; display: inline-block;"></span>
-            <span>${lang === 'mm' ? 'ဖွင့်' : 'Available'}</span>
+            <span>${I18n.t('date_status_available')}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #D8902F; display: inline-block;"></span>
-            <span>${lang === 'mm' ? 'အကန့်အသတ်' : 'Limited'}</span>
+            <span>${I18n.t('date_status_limited')}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
-            <span>${lang === 'mm' ? 'အပြည့်' : 'Full'}</span>
+            <span>${I18n.t('date_status_full')}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
             <span style="width: 7px; height: 7px; border-radius: 50%; background: #9ca3af; display: inline-block;"></span>
-            <span>${lang === 'mm' ? 'ပိတ်' : 'Closed'}</span>
+            <span>${I18n.t('date_status_closed')}</span>
           </div>
         </div>
 
@@ -284,9 +257,8 @@ const ScreenS09 = (() => {
   }
 
   function render() {
-    const lang = I18n.getLang();
-    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
-    const activeStatus = getDateStatus(selectedIsoDate, lang);
+    const activeDateDisplay = getFullDisplay(selectedIsoDate);
+    const activeStatus = getDateStatus(selectedIsoDate);
 
     const offlineBannerHtml = isOffline ? `
       <div style="background: #fff3e0; color: #ed6c02; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; border: 1px solid #ffe0b2;">
@@ -339,13 +311,13 @@ const ScreenS09 = (() => {
                   <span class="stitch-card-icon">👤</span>
                   <h4 class="stitch-card-title">${I18n.t('mb_group_customer')}</h4>
                 </div>
-                <span class="stitch-card-badge" style="background: rgba(15, 76, 92, 0.08); color: #0F4C5C;">${lang === 'mm' ? 'မဖြစ်မနေ' : 'Required'}</span>
+                <span class="stitch-card-badge" style="background: rgba(15, 76, 92, 0.08); color: #0F4C5C;">${I18n.t('s09_required')}</span>
               </div>
 
               <!-- Customer Name -->
               <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label style="font-size: 13px; font-weight: 500; color: #46464f;">${I18n.t('customer_name')} <span class="text-error">*</span></label>
-                <input type="text" id="mb-name" placeholder="${lang === 'mm' ? 'ဥပမာ - ဦးမောင်မောင်' : 'e.g. John Doe'}" style="width: 100%; height: 46px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 16px; font-size: 14.5px; color: #1F2937; background: #f4f8fa; outline: none; transition: border-color 0.15s;" required />
+                <input type="text" id="mb-name" placeholder="${I18n.t('s09_name_placeholder')}" style="width: 100%; height: 46px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 0 16px; font-size: 14.5px; color: #1F2937; background: #f4f8fa; outline: none; transition: border-color 0.15s;" required />
               </div>
 
               <!-- Customer Phone -->
@@ -390,7 +362,7 @@ const ScreenS09 = (() => {
                   <span class="stitch-card-icon">📝</span>
                   <h4 class="stitch-card-title">${I18n.t('mb_group_notes')}</h4>
                 </div>
-                <span class="stitch-card-badge">${lang === 'mm' ? 'စိတ်ကြိုက်' : 'Optional'}</span>
+                <span class="stitch-card-badge">${I18n.t('s09_optional')}</span>
               </div>
 
               <!-- Quick Occasion & Dietary Tags -->
@@ -408,7 +380,7 @@ const ScreenS09 = (() => {
               </div>
 
               <!-- Notes Textarea -->
-              <textarea id="mb-notes" placeholder="${lang === 'mm' ? 'ဓာတ်မတည့်သည့်အစားအစာများ၊ ကလေးထိုင်ခုံ စသည်...' : 'Allergies, high chair, birthday decoration, quiet corner...'}" style="width: 100%; min-height: 84px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #1F2937; background: #f4f8fa; resize: none; outline: none; transition: border-color 0.15s;"></textarea>
+              <textarea id="mb-notes" placeholder="${I18n.t('s09_notes_placeholder')}" style="width: 100%; min-height: 84px; border: 1px solid #c7c5d0; border-radius: 12px; padding: 12px 16px; font-size: 14px; color: #1F2937; background: #f4f8fa; resize: none; outline: none; transition: border-color 0.15s;"></textarea>
             </div>
 
           </div>
@@ -423,7 +395,7 @@ const ScreenS09 = (() => {
                   <span class="stitch-card-icon">👥</span>
                   <h4 class="stitch-card-title">${I18n.t('mb_group_guests')}</h4>
                 </div>
-                <span class="stitch-card-badge" id="guest-count-badge">${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
+                <span class="stitch-card-badge" id="guest-count-badge">${guestCount} ${I18n.t('s09_guests_unit')}</span>
               </div>
 
               <!-- 1-Tap Quick Guest Chips -->
@@ -445,10 +417,10 @@ const ScreenS09 = (() => {
               <!-- Stepper Control -->
               <div style="display: flex; align-items: center; justify-content: space-between; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 8px 16px;">
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 11.5px; font-weight: 600; color: #64748B; text-transform: uppercase;">${lang === 'mm' ? 'ဧည့်သည် စုစုပေါင်း' : 'Party Count'}</span>
+                  <span style="font-size: 11.5px; font-weight: 600; color: #64748B; text-transform: uppercase;">${I18n.t('s09_party_count')}</span>
                   <div style="display: flex; align-items: baseline; gap: 4px;">
                     <span style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; color: #0F4C5C;" id="guest-count">${guestCount}</span>
-                    <span style="font-size: 13px; color: #475569; font-weight: 500;">${lang === 'mm' ? 'ဦး' : 'person(s)'}</span>
+                    <span style="font-size: 13px; color: #475569; font-weight: 500;">${I18n.t('s09_person_unit')}</span>
                   </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -469,16 +441,16 @@ const ScreenS09 = (() => {
                   <span class="stitch-card-icon">🪑</span>
                   <h4 class="stitch-card-title">${I18n.t('mb_group_table')}</h4>
                 </div>
-                <span class="stitch-card-badge" id="s09-table-badge">${selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : (lang === 'mm' ? 'အလိုအလျောက်' : 'Auto Match')}</span>
+                <span class="stitch-card-badge" id="s09-table-badge">${selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : I18n.t('s09_auto_match')}</span>
               </div>
 
               <!-- Seating Preference Tags -->
               <div style="display: flex; flex-direction: column; gap: 6px;">
-                <span style="font-size: 12px; font-weight: 600; color: #46464f;">${lang === 'mm' ? 'ထိုင်ခုံ စိတ်ကြိုက်ရွေးချယ်မှု' : 'Seating Feature Tags'}</span>
+                <span style="font-size: 12px; font-weight: 600; color: #46464f;">${I18n.t('s09_seating_feature_tags')}</span>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="s09-tags-container">
                   ${tableTags.map(tag => {
                     const isSelected = selectedSeatTags.includes(tag.code);
-                    const label = lang === 'mm' ? tag.name_mm : tag.name;
+                    const label = I18n.getSeatTagLabel(tag.code);
                     return `
                       <button type="button" data-tag-code="${tag.code}" onclick="ScreenS09.togglePreferredTag('${tag.code}')" style="padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1.5px solid ${isSelected ? '#0B1220' : '#CBD5E1'}; background: ${isSelected ? '#0B1220' : '#FFFFFF'}; color: ${isSelected ? '#FFFFFF' : '#334155'}; cursor: pointer; transition: all 0.15s;">
                         ${label}
@@ -491,7 +463,7 @@ const ScreenS09 = (() => {
               <!-- Assigned Table Select -->
               <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label style="font-size: 13px; font-weight: 500; color: #46464f;">${lang === 'mm' ? 'သတ်မှတ်ထားသော စားပွဲ' : 'Assigned Table'}</label>
+                  <label style="font-size: 13px; font-weight: 500; color: #46464f;">${I18n.t('s09_assigned_table')}</label>
                   <span style="font-size: 11px; color: #64748B;">${I18n.t('select_table')}</span>
                 </div>
                 <div id="s09-table-select-container">
@@ -515,30 +487,30 @@ const ScreenS09 = (() => {
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
                   <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
                     <span class="material-symbols-outlined" style="font-size: 16px;">event</span>
-                    ${lang === 'mm' ? 'ရက်စွဲ နှင့် အချိန်' : 'Date & Time'}
+                    ${I18n.t('s09_date_and_time')}
                   </span>
                   <span style="color: #0F4C5C; font-weight: 700;" id="summary-text">${activeDateDisplay} • ${selectedTime}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
                   <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
                     <span class="material-symbols-outlined" style="font-size: 16px;">group</span>
-                    ${lang === 'mm' ? 'ဧည့်သည်' : 'Guests'}
+                    ${I18n.t('guests')}
                   </span>
-                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-guests">${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}</span>
+                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-guests">${guestCount} ${I18n.t('s09_guests_unit')}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
                   <span style="color: #64748B; display: flex; align-items: center; gap: 6px;">
                     <span class="material-symbols-outlined" style="font-size: 16px;">table_restaurant</span>
-                    ${lang === 'mm' ? 'စားပွဲ အခြေအနေ' : 'Table Status'}
+                    ${I18n.t('s09_table_status')}
                   </span>
-                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-table-status">Table 12 (${lang === 'mm' ? 'ရရှိနိုင်ပါသည်' : 'Available'})</span>
+                  <span style="color: #0F4C5C; font-weight: 700;" id="summary-table-status">Table 12 (${I18n.t('s09_available')})</span>
                 </div>
               </div>
 
               <!-- Primary Submit CTA -->
               <button type="submit" class="stitch-register-btn">
                 <span class="material-symbols-outlined" style="font-size: 22px; font-variation-settings: 'FILL' 1;">check_circle</span>
-                <span>${lang === 'mm' ? 'ဘွတ်ကင် စာရင်းသွင်းမည်' : 'Register Booking'}</span>
+                <span>${I18n.t('register_booking')}</span>
               </button>
             </div>
 
@@ -553,7 +525,7 @@ const ScreenS09 = (() => {
     `;
 
     const content = `
-      ${Components.pageHeader(I18n.t('manual_booking'), lang === 'mm' ? 'ဧည့်သည် ကြိုတင်စာရင်းအသစ် သွင်းယူရန်' : 'Create a new reservation.')}
+      ${Components.pageHeader(I18n.t('manual_booking'), I18n.t('manual_booking_subtitle'))}
       ${formHtml}
     `;
 
@@ -596,9 +568,8 @@ const ScreenS09 = (() => {
 
   function setSelectedDate(isoDate) {
     selectedIsoDate = isoDate;
-    const lang = I18n.getLang();
-    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
-    const activeStatus = getDateStatus(selectedIsoDate, lang);
+    const activeDateDisplay = getFullDisplay(selectedIsoDate);
+    const activeStatus = getDateStatus(selectedIsoDate);
 
     const wrapper = document.getElementById('s09-calendar-wrapper');
     if (wrapper) {
@@ -637,8 +608,7 @@ const ScreenS09 = (() => {
     if (el) el.innerText = guestCount;
     const badge = document.getElementById('guest-count-badge');
     if (badge) {
-      const lang = I18n.getLang();
-      badge.innerText = `${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
+      badge.innerText = `${guestCount} ${I18n.t('s09_guests_unit')}`;
     }
     updateGuestChips();
     refreshTableSelect();
@@ -699,8 +669,7 @@ const ScreenS09 = (() => {
 
     const tableBadge = document.getElementById('s09-table-badge');
     if (tableBadge) {
-      const lang = I18n.getLang();
-      tableBadge.innerText = selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : (lang === 'mm' ? 'အလိုအလျောက်' : 'Auto Match');
+      tableBadge.innerText = selectedSeatTags.length > 0 ? `${selectedSeatTags.length} tag(s)` : I18n.t('s09_auto_match');
     }
 
     refreshTableSelect();
@@ -708,8 +677,7 @@ const ScreenS09 = (() => {
   }
 
   function updateSummary() {
-    const lang = I18n.getLang();
-    const activeDateDisplay = getFullDisplay(selectedIsoDate, lang);
+    const activeDateDisplay = getFullDisplay(selectedIsoDate);
     
     const summaryTextEl = document.getElementById('summary-text');
     if (summaryTextEl) {
@@ -718,7 +686,7 @@ const ScreenS09 = (() => {
 
     const summaryGuestsEl = document.getElementById('summary-guests');
     if (summaryGuestsEl) {
-      summaryGuestsEl.innerText = `${guestCount} ${lang === 'mm' ? 'ဦး' : 'Guests'}`;
+      summaryGuestsEl.innerText = `${guestCount} ${I18n.t('s09_guests_unit')}`;
     }
 
     const tableSelect = document.getElementById('mb-table');
@@ -726,9 +694,9 @@ const ScreenS09 = (() => {
     if (tableStatusEl) {
       const val = tableSelect ? tableSelect.value : '';
       const filtered = getFilteredTables();
-      const availText = lang === 'mm' ? 'ရရှိနိုင်ပါသည်' : 'Available';
-      const autoText = lang === 'mm' ? 'စနစ်မှ အလိုအလျောက် သတ်မှတ်မည်' : 'Auto Assign';
-      const noMatchText = lang === 'mm' ? 'ကိုက်ညီသော စားပွဲမရှိပါ' : 'No matching table';
+      const availText = I18n.t('s09_available');
+      const autoText = I18n.t('s09_auto_assign');
+      const noMatchText = I18n.t('s09_no_matching_table');
       
       if (val) {
         tableStatusEl.innerText = `${val} (${availText})`;
@@ -759,9 +727,7 @@ const ScreenS09 = (() => {
     const name = nameInput ? nameInput.value.trim() : '';
     
     if (!Components.validatePhoneNumber('mb-phone')) {
-      showToast('error', 'Validation Error', I18n.getLang() === 'mm' 
-        ? 'ကျေးဇူးပြု၍ တရားဝင် မြန်မာဖုန်းနံပါတ် ၇ လုံးမှ ၉ လုံး ထည့်သွင်းပါ (ဥပမာ - ၉၄၅၀၀၀၀၀၀၀)' 
-        : 'Please enter a valid Myanmar phone number (e.g., 9450000000).');
+      showToast('error', I18n.t('validation_error'), I18n.t('phone_validation_msg'));
       return;
     }
     const phone = Components.getRawPhoneNumber('mb-phone');
@@ -771,8 +737,8 @@ const ScreenS09 = (() => {
     const table = document.getElementById('mb-table')?.value || 'Table 12';
     const notes = document.getElementById('mb-notes')?.value.trim() || '';
 
-    if(!name || !phone) {
-      showToast('error', 'Error', 'Please fill required inputs.');
+    if (!name || !phone) {
+      showToast('error', I18n.t('error') || 'Error', I18n.t('fill_required_fields'));
       return;
     }
 

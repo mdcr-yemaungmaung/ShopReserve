@@ -13,32 +13,30 @@ const ScreenS22 = (() => {
     { id: 4, email: 'thiha@glasspavilion.example', name: 'Thiha Kyaw', role: 'staff', status: 'suspended', twoFa: 'not_registered', lastLogin: '2026-07-28 09:14' }
   ];
 
-  const ROLE_LABELS = { owner: { en: 'Owner', mm: 'ပိုင်ရှင်' }, staff: { en: 'Staff', mm: 'ဝန်ထမ်း' } };
-
-  function t(role, lang) {
-    const meta = ROLE_LABELS[role] || { en: role, mm: role };
-    return lang === 'mm' ? meta.mm : meta.en;
+  function getRoleLabel(role) {
+    if (role === 'owner') return I18n.t('s22_role_owner');
+    if (role === 'staff') return I18n.t('s22_role_staff');
+    return role;
   }
 
   function render() {
-    const lang = I18n.getLang();
     const isOwner = Router.getAuth().role === 'shop_owner';
 
     const rowsHtml = staffAccounts.map((a, idx) => {
       const roleBadge = a.role === 'owner'
-        ? `<span class="badge badge--primary" style="background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;">${t('owner', lang)}</span>`
-        : `<span class="badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;">${t('staff', lang)}</span>`;
+        ? `<span class="badge badge--primary" style="background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe;">${getRoleLabel('owner')}</span>`
+        : `<span class="badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;">${getRoleLabel('staff')}</span>`;
 
       const statusBadge = a.status === 'active'
-        ? `<span class="badge badge--success">${lang === 'mm' ? 'ဖွင့်ထား' : 'Active'}</span>`
-        : `<span class="badge badge--expired">${lang === 'mm' ? 'ရပ်ထား' : 'Suspended'}</span>`;
+        ? `<span class="badge badge--success">${I18n.t('s22_active')}</span>`
+        : `<span class="badge badge--expired">${I18n.t('s22_suspended')}</span>`;
 
       const twoFaBadge = a.twoFa === 'enabled'
         ? `<span class="badge badge--success" style="background:#dcfce7;color:#166534;border:1px solid #86efac;">2FA ✓</span>`
-        : `<span class="badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;">2FA ${lang === 'mm' ? 'မရှိ' : '—'}</span>`;
+        : `<span class="badge" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;">2FA ${I18n.t('s22_no_2fa')}</span>`;
 
       const lastOwner = a.role === 'owner';
-      const actions = !isOwner ? `<span style="font-size:11.5px;color:var(--color-outline);">${lang === 'mm' ? 'ဖတ်ရန်သာ' : 'Read-only'}</span>` : `
+      const actions = !isOwner ? `<span style="font-size:11.5px;color:var(--color-outline);">${I18n.t('s22_readonly')}</span>` : `
         <div class="flex gap-2">
           <button class="btn btn-ghost btn-sm" onclick="ScreenS22.reinvite(${idx})" title="Invite / re-invite">✉️</button>
           ${a.status === 'active'
@@ -55,7 +53,7 @@ const ScreenS22 = (() => {
           <td style="font-weight:600;color:var(--color-primary);font-family:monospace;font-size:12.5px;">${a.email}</td>
           <td>
             <div style="font-weight:600;">${a.name}</div>
-            <div style="font-size:11px;color:var(--color-outline);">${lang === 'mm' ? 'နောက်ဆုံးဝင်ချိန်' : 'Last login'}: ${a.lastLogin}</div>
+            <div style="font-size:11px;color:var(--color-outline);">${I18n.t('s22_last_login')}: ${a.lastLogin}</div>
           </td>
           <td>${roleBadge}</td>
           <td>${statusBadge}</td>
@@ -65,52 +63,50 @@ const ScreenS22 = (() => {
     }).join('');
 
     const toolbar = isOwner
-      ? `<button class="btn btn-primary btn-sm" onclick="ScreenS22.showInviteModal()">${Components.icon('plus', 14)} ${lang === 'mm' ? 'အကောင့်ဖိတ်ရန်' : 'Invite Account'}</button>`
+      ? `<button class="btn btn-primary btn-sm" onclick="ScreenS22.showInviteModal()">${Components.icon('plus', 14)} ${I18n.t('s22_invite_account')}</button>`
       : '';
 
     const tableHtml = Components.dataTable({
       columns: [
-        lang === 'mm' ? 'အီးမေးလ်' : 'Email',
-        lang === 'mm' ? 'အမည်' : 'Name',
-        lang === 'mm' ? 'အခန်းကဏ္ဍ' : 'Role',
-        lang === 'mm' ? 'အခြေအနေ' : 'Status',
+        I18n.t('s22_email_label'),
+        I18n.t('s22_name_label'),
+        I18n.t('s22_role_label'),
+        I18n.t('s22_status_label'),
         '2FA',
-        lang === 'mm' ? 'လုပ်ဆောင်ချက်' : 'Actions'
+        I18n.t('s22_actions_label')
       ],
       rows: rowsHtml,
-      searchPlaceholder: lang === 'mm' ? 'အီးမေးလ်/အမည် ရှာရန်...' : 'Search email or name...',
+      searchPlaceholder: I18n.t('s22_search_placeholder'),
       actions: toolbar,
       pagination: false
     });
 
     const readOnlyBanner = !isOwner ? `
       <div class="p-3 mb-4 bg-error-container text-on-error-container flex items-center gap-2" style="border-radius:var(--radius-md);font-weight:600;font-size:13px;">
-        ⚠️ ${lang === 'mm' ? 'ဖတ်ရှုရန်သာ: ပိုင်ရှင် (Owner) သာ အကောင့်များ စီမံနိုင်ပါသည်။' : 'Read-Only Mode: Only the Shop Owner (shop_owner) can manage login accounts (C-15).'}
+        ⚠️ ${I18n.t('s22_readonly_owner_warning')}
       </div>
     ` : '';
 
     const subNavTabs = `
       <div class="flex gap-2 mb-4 p-1 bg-surface-container-low" style="border-radius:var(--radius-md);border:1px solid var(--color-outline-variant);width:fit-content;">
-        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/staff-tables')">👥 ${lang === 'mm' ? 'ဝန်ထမ်း' : 'Staff Members'}</button>
-        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/tables')">🪑 ${lang === 'mm' ? 'စားပွဲ' : 'Seat & Tables'}</button>
-        <button class="btn btn-primary btn-sm" onclick="Router.navigate('/shop/staff-accounts')">🔐 ${lang === 'mm' ? 'စတက်ဖ်အကောင့်' : 'Staff Accounts'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/staff-tables')">👥 ${I18n.t('s22_tab_staff')}</button>
+        <button class="btn btn-ghost btn-sm" onclick="Router.navigate('/shop/tables')">🪑 ${I18n.t('s22_tab_tables')}</button>
+        <button class="btn btn-primary btn-sm" onclick="Router.navigate('/shop/staff-accounts')">🔐 ${I18n.t('s22_tab_accounts')}</button>
       </div>`;
 
     const content = `
-      ${Components.pageHeader(lang === 'mm' ? 'စတက်ဖ်အကောင့် စီမံခန့်ခွဲမှု' : 'Staff Accounts Management', lang === 'mm' ? 'ဆိုင်၏ လော့ဂ်အင်အကောင့်များကို စီမံပါ (shop_users)' : 'Manage shop login accounts (shop_users)')}
+      ${Components.pageHeader(I18n.t('s22_title'), I18n.t('s22_subtitle'))}
       ${subNavTabs}
       ${readOnlyBanner}
       <div class="card p-0 overflow-hidden">
         ${tableHtml}
       </div>
       <div class="card" style="margin-top:16px;padding:14px 18px;font-size:12.5px;color:var(--color-on-surface-variant);line-height:1.7;">
-        ${lang === 'mm'
-          ? '🔐 2FA ပြန်လည်သတ်မှတ်ခြင်း: ဝန်ထမ်းက ဖုန်းပျောက်ပြီး ပြန်လည်ရယူနိုင်မှု မရှိပါက ဤနေရာမှ လင့်ခ် ပို့နိုင်သည် (1နာရီသက်တမ်း)။ ပိုင်ရှင်၏ 2FA ပြန်လည်သတ်မှတ်မှုကို AD-17 (အော်ပရေတာ) မှ သာ ဆောင်ရွက်နိုင်သည်။'
-          : '🔐 2FA reset: If a staff member loses their device and recovery codes, send a one-time (1h expiry) reset link here. Owner 2FA recovery is handled via AD-17 (operator) only.'}
+        ${I18n.t('s22_2fa_help')}
       </div>
     `;
 
-    App.renderAdminPage('shop', lang === 'mm' ? 'စတက်ဖ်အကောင့်' : 'Staff Accounts', content);
+    App.renderAdminPage('shop', I18n.t('s22_tab_accounts'), content);
   }
 
   function logAudit(action, detail) {
@@ -122,7 +118,6 @@ const ScreenS22 = (() => {
   }
 
   function showInviteModal() {
-    const lang = I18n.getLang();
     const modal = document.createElement('div');
     modal.className = 'modal-backdrop';
     modal.id = 's22-invite-modal';
@@ -130,23 +125,23 @@ const ScreenS22 = (() => {
     modal.innerHTML = `
       <div class="modal modal--sm animate-scale-in">
         <div class="modal__header">
-          <h3 class="modal__title">${lang === 'mm' ? 'အကောင့်ဖိတ်ရန်' : 'Invite Staff Account'}</h3>
+          <h3 class="modal__title">${I18n.t('s22_invite_modal_title')}</h3>
           <button class="modal__close" onclick="document.getElementById('s22-invite-modal').remove()">✕</button>
         </div>
         <div class="modal__body flex flex-col gap-4">
           <div>
-            <label class="form-label" style="font-size:12px;font-weight:600;">Email *</label>
+            <label class="form-label" style="font-size:12px;font-weight:600;">${I18n.t('s22_email_label')} *</label>
             <input type="email" id="s22-email" class="form-input" placeholder="staff@example.com">
           </div>
           <div>
-            <label class="form-label" style="font-size:12px;font-weight:600;">${lang === 'mm' ? 'အမည်' : 'Name'} *</label>
+            <label class="form-label" style="font-size:12px;font-weight:600;">${I18n.t('s22_name_label')} *</label>
             <input type="text" id="s22-name" class="form-input" placeholder="Full name">
           </div>
           <div>
-            <label class="form-label" style="font-size:12px;font-weight:600;">${lang === 'mm' ? 'အခန်းကဏ္ဍ' : 'Role'} *</label>
+            <label class="form-label" style="font-size:12px;font-weight:600;">${I18n.t('s22_role_label')} *</label>
             <select id="s22-role" class="form-input">
-              <option value="staff">Staff</option>
-              <option value="owner">Owner</option>
+              <option value="staff">${I18n.t('s22_role_staff')}</option>
+              <option value="owner">${I18n.t('s22_role_owner')}</option>
             </select>
           </div>
         </div>

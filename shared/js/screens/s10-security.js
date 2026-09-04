@@ -142,7 +142,7 @@ var ScreenS10 = (() => {
               ${I18n.t('change_password_title')}
             </h3>
             <p style="font-size:13px; color:#46464f; margin:3px 0 0 0;">
-              ${lang === 'mm' ? 'အကောင့်ဝင်ရောက်ရေး စကားဝှက်ကို လုံခြုံစွာ ပြောင်းလဲပါ' : 'Update credentials and password security.'}
+              ${I18n.t('change_password_subtitle')}
             </p>
           </div>
           <span style="font-size:11.5px; background:#0F1142; color:#aaf457; padding:4px 12px; border-radius:9999px; font-weight:700;">

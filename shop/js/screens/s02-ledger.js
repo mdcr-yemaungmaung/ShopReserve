@@ -277,10 +277,10 @@ const ScreenS02 = (() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
                 <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
-                  ${lang === 'mm' ? 'ဘွတ်ကင် စုစုပေါင်း' : 'Total Bookings'}
+                  ${I18n.t('s02_total_bookings')}
                 </span>
                 <div style="font-size:24px; font-weight:800; color:#0F768E; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
-                  ${counts.total} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Total'}</span>
+                  ${counts.total} <span style="font-size:12.5px; font-weight:600; color:#475569;">${I18n.t('s02_unit_total')}</span>
                 </div>
               </div>
               <div style="width:34px; height:34px; border-radius:8px; background:rgba(15,118,142,0.1); color:#0F768E; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -288,7 +288,7 @@ const ScreenS02 = (() => {
               </div>
             </div>
             <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              👥 ${lang === 'mm' ? 'ဧည့်သည် စုစုပေါင်း' : 'Total Expected'}: <strong>${counts.totalGuests} ${lang === 'mm' ? 'ဦး' : 'Guests'}</strong>
+              👥 ${I18n.t('s02_total_expected')}: <strong>${counts.totalGuests} ${I18n.t('s02_unit_guests')}</strong>
             </div>
           </div>
 
@@ -297,10 +297,10 @@ const ScreenS02 = (() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
                 <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
-                  ${lang === 'mm' ? 'အတည်ပြုပြီး / ထိုင်ခုံချ' : 'Confirmed & Seated'}
+                  ${I18n.t('s02_confirmed_and_seated')}
                 </span>
                 <div style="font-size:24px; font-weight:800; color:#10B981; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
-                  ${counts.confirmed + counts.checked_in} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Active'}</span>
+                  ${counts.confirmed + counts.checked_in} <span style="font-size:12.5px; font-weight:600; color:#475569;">${I18n.t('s02_unit_active')}</span>
                 </div>
               </div>
               <div style="width:34px; height:34px; border-radius:8px; background:rgba(16,185,129,0.1); color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -308,7 +308,7 @@ const ScreenS02 = (() => {
               </div>
             </div>
             <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              🪑 <strong>${counts.checked_in}</strong> ${lang === 'mm' ? 'ထိုင်ခုံချပြီး' : 'Seated'} • <strong>${counts.confirmed}</strong> ${lang === 'mm' ? 'အတည်ပြုပြီး' : 'Confirmed'}
+              🪑 <strong>${counts.checked_in}</strong> ${I18n.t('s02_seated')} • <strong>${counts.confirmed}</strong> ${I18n.t('s02_confirmed')}
             </div>
           </div>
 
@@ -317,10 +317,10 @@ const ScreenS02 = (() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
                 <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
-                  ${lang === 'mm' ? 'လုပ်ဆောင်ရန် လိုအပ်' : 'Action Required'}
+                  ${I18n.t('s02_action_required')}
                 </span>
                 <div style="font-size:24px; font-weight:800; color:#D97706; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
-                  ${counts.pending} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'စောင့်ဆိုင်းဆဲ' : 'Pending'}</span>
+                  ${counts.pending} <span style="font-size:12.5px; font-weight:600; color:#475569;">${I18n.t('s02_pending')}</span>
                 </div>
               </div>
               <div style="width:34px; height:34px; border-radius:8px; background:rgba(245,158,11,0.1); color:#D97706; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -329,8 +329,8 @@ const ScreenS02 = (() => {
             </div>
             <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               ${counts.pendingGuestCallbacks > 0 
-                ? `📞 <strong>${counts.pendingGuestCallbacks}</strong> ${lang === 'mm' ? 'ဖုန်းဆက်ရန် လိုအပ်' : 'Phone Callbacks'}` 
-                : (lang === 'mm' ? 'အတည်ပြုချက် စောင့်ဆိုင်းနေသည်' : 'Awaiting Merchant Approval')}
+                ? `📞 <strong>${counts.pendingGuestCallbacks}</strong> ${I18n.t('s02_phone_callbacks')}` 
+                : I18n.t('s02_awaiting_merchant')}
             </div>
           </div>
 
@@ -339,10 +339,10 @@ const ScreenS02 = (() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
                 <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
-                  ${lang === 'mm' ? 'ပြီးစီးပြီး' : 'Completed'}
+                  ${I18n.t('s02_completed')}
                 </span>
                 <div style="font-size:24px; font-weight:800; color:#475569; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
-                  ${counts.completed} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ပြီးစီး' : 'Finished'}</span>
+                  ${counts.completed} <span style="font-size:12.5px; font-weight:600; color:#475569;">${I18n.t('s02_finished')}</span>
                 </div>
               </div>
               <div style="width:34px; height:34px; border-radius:8px; background:rgba(100,116,139,0.12); color:#475569; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -350,7 +350,7 @@ const ScreenS02 = (() => {
               </div>
             </div>
             <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              ✓ ${lang === 'mm' ? 'ပြီးစီးခဲ့သော ဘွတ်ကင်များ' : 'Finished Dining Services'}
+              ✓ ${I18n.t('s02_finished_dining_services')}
             </div>
           </div>
 
@@ -359,10 +359,10 @@ const ScreenS02 = (() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
                 <span style="font-size:11.5px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.04em;">
-                  ${lang === 'mm' ? 'ပယ်ဖျက် / မလာရောက်' : 'Cancellations / No-Show'}
+                  ${I18n.t('s02_cancellations_no_show')}
                 </span>
                 <div style="font-size:24px; font-weight:800; color:#EF4444; margin-top:3px; font-family:'Outfit',sans-serif; line-height:1.2;">
-                  ${counts.cancelled + counts.no_show} <span style="font-size:12.5px; font-weight:600; color:#475569;">${lang === 'mm' ? 'ခု' : 'Total'}</span>
+                  ${counts.cancelled + counts.no_show} <span style="font-size:12.5px; font-weight:600; color:#475569;">${I18n.t('s02_unit_total')}</span>
                 </div>
               </div>
               <div style="width:34px; height:34px; border-radius:8px; background:rgba(239,68,68,0.1); color:#EF4444; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -370,7 +370,7 @@ const ScreenS02 = (() => {
               </div>
             </div>
             <div style="font-size:11.5px; color:#64748B; margin-top:10px; border-top:1px solid #F1F5F9; padding-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              🚫 <strong>${counts.cancelled}</strong> ${lang === 'mm' ? 'ပယ်ဖျက်' : 'Cancelled'} • <strong>${counts.no_show}</strong> ${lang === 'mm' ? 'မလာရောက်' : 'No-Show'}
+              🚫 <strong>${counts.cancelled}</strong> ${I18n.t('s02_cancelled')} • <strong>${counts.no_show}</strong> ${I18n.t('s02_no_show')}
             </div>
           </div>
         </div>

@@ -254,13 +254,13 @@ const ScreenS01 = (() => {
           <!-- Quick Walk-in (1-tap host desk) -->
           <button class="btn btn-secondary" onclick="ScreenS01.openQuickWalkIn()" style="font-weight: 700; height: 44px; padding: 0 18px; border-radius: 10px; border: 1.5px solid #0F768E; color: #0F768E; background: #F0F9FB; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; box-shadow: 0 1px 3px rgba(15,118,142,0.1);">
             <span style="font-size: 16px;">⚡</span>
-            <span>${lang === 'mm' ? 'အမြန် ဧည့်သည်နေရာချ' : 'Quick Walk-in'}</span>
+            <span>${I18n.t('quick_walk_in')}</span>
           </button>
 
           <!-- New Reservation Modal -->
           <button class="btn btn-primary" onclick="ScreenS03B.open(() => ScreenS01.render())" style="font-weight: 700; height: 44px; padding: 0 20px; border-radius: 10px; background: #0B1220; color: #FFFFFF; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; box-shadow: 0 2px 8px rgba(11,18,32,0.2);">
             ${Components.icon('plus', 16)}
-            <span>${lang === 'mm' ? 'ဘွတ်ကင် အသစ်' : 'New Booking'}</span>
+            <span>${I18n.t('new_booking')}</span>
           </button>
 
           <!-- Fullscreen Toggle for Host Stand Tablet -->
@@ -783,19 +783,21 @@ const ScreenS01 = (() => {
 
     const modal = document.createElement('div');
     modal.id = modalId;
-    modal.className = 'modal-backdrop';
-    modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(11,18,32,0.6); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px;';
+    modal.className = 'modal-backdrop s01-walkin-backdrop';
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.remove();
+    };
     
     modal.innerHTML = `
-      <div class="card animate-scale-in" style="width:100%; max-width:460px; background:#FFFFFF; border-radius:16px; padding:24px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <div class="card animate-scale-in s01-walkin-sheet" onclick="event.stopPropagation()" style="width:100%; max-width:460px; background:#FFFFFF; border-radius:16px; padding:24px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
         <div class="flex justify-between items-center mb-4">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:22px;">⚡</span>
+            <span class="material-symbols-outlined" style="font-size:22px; color:var(--color-primary, #0F4C5C);">bolt</span>
             <h3 style="font-size:18px; font-weight:800; color:#0B1220; margin:0; font-family:'Outfit',sans-serif;">
               Quick Walk-in Seating
             </h3>
           </div>
-          <button type="button" onclick="document.getElementById('${modalId}').remove()" style="background:none; border:none; font-size:20px; color:#94A3B8; cursor:pointer;">✕</button>
+          <button type="button" class="modal__close" onclick="document.getElementById('${modalId}').remove()" style="min-width:44px; min-height:44px; width:44px; height:44px; font-size:20px; cursor:pointer;" title="Close">✕</button>
         </div>
 
         <form onsubmit="ScreenS01.submitWalkIn(event)">
@@ -804,7 +806,7 @@ const ScreenS01 = (() => {
             <label class="form-label" style="font-weight:700; font-size:13px; color:#0B1220; margin-bottom:8px; display:block;">Number of Guests (Pax):</label>
             <div style="display:flex; gap:8px; flex-wrap:wrap;" id="walkin-pax-pills">
               ${[1, 2, 3, 4, 5, 6, 8, 10].map((num, i) => `
-                <button type="button" class="s01-touch-pill ${i === 1 ? 'active' : ''}" onclick="ScreenS01.selectWalkInPax(this, ${num})" style="flex:1; min-width:44px; justify-content:center; font-size:14px; font-weight:700;">
+                <button type="button" class="s01-touch-pill ${i === 1 ? 'active' : ''}" onclick="ScreenS01.selectWalkInPax(this, ${num})" style="flex:1; min-width:44px; min-height:44px; justify-content:center; font-size:14px; font-weight:700;">
                   ${num}
                 </button>
               `).join('')}
@@ -829,12 +831,13 @@ const ScreenS01 = (() => {
           </div>
 
           <!-- Action Buttons -->
-          <div style="display:flex; gap:10px;">
-            <button type="button" class="btn btn-ghost" onclick="document.getElementById('${modalId}').remove()" style="flex:1; height:44px; font-weight:600;">
+          <div class="s01-walkin-actions" style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('${modalId}').remove()" style="flex:1; height:44px; min-height:44px; font-weight:600;">
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary" style="flex:2; height:44px; font-weight:800; background:#0F768E; border-color:#0F768E; color:white; border-radius:10px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-              🪑 Seat Immediately
+            <button type="submit" class="btn btn-primary" style="flex:2; height:44px; min-height:44px; font-weight:800; background:#0F768E; border-color:#0F768E; color:white; border-radius:10px; font-size:14px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+              <span class="material-symbols-outlined" style="font-size:20px;">chair</span>
+              <span>Seat Immediately</span>
             </button>
           </div>
         </form>

@@ -409,6 +409,40 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Branch Display Badge */
+.admin-header__branch-badge,
+.admin-header__branch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background-color: var(--color-surface-container, #F1F5F9);
+  border: 1px solid var(--color-outline-variant, #E2E8F0);
+  color: var(--color-on-surface, #0F172A);
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 220px;
+  min-width: 0;
+  flex-shrink: 1;
+  user-select: none;
+}
+
+.admin-header__branch-icon {
+  font-size: 18px;
+  color: var(--color-primary, #0F4C5C);
+  flex-shrink: 0;
+}
+
+.admin-header__branch-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .admin-header__brand-title {
   font-family: var(--font-headline, 'Inter', sans-serif);
@@ -1020,13 +1054,13 @@
 .admin-content {
   margin-left: 0;
   flex: 1;
-  padding: var(--space-6);
+  padding: var(--gutter-desktop, 32px);
   background: var(--color-bg);
   min-height: calc(100vh - var(--header-height));
   transition: margin-left var(--transition-normal);
 }
 .admin-content__inner {
-  max-width: 1200px;
+  max-width: var(--container-max-width, 1280px);
   margin: 0 auto;
 }
 
@@ -1247,12 +1281,30 @@
     margin-left: 0;
     padding: 0 var(--space-4);
   }
+  .admin-header__branch-badge,
+  .admin-header__branch-chip {
+    max-width: 140px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .admin-header__search-container {
+    width: 130px;
+  }
+  @media (max-width: 639px) {
+    .admin-header__search-container {
+      display: none !important;
+    }
+    .admin-header__branch-badge,
+    .admin-header__branch-chip {
+      max-width: 160px;
+    }
+  }
   .admin-header__hamburger {
     display: flex;
   }
   .admin-content {
     margin-left: 0;
-    padding: var(--space-4);
+    padding: var(--gutter-mobile, 16px);
   }
 
   /* Layout helpers - stack on mobile */
@@ -1280,7 +1332,10 @@
   .hide-desktop { display: none !important; }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-content {
+    padding: var(--gutter-tablet, 24px);
+  }
   .user-content {
     padding: var(--space-6) var(--space-6);
   }
@@ -1523,12 +1578,21 @@
   .shop-content,
   .admin-main,
   .shop-main {
-    padding: 12px !important;
+    padding: var(--gutter-tablet, 24px) !important;
     margin-left: 0 !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-content,
+  .shop-content,
+  .admin-main,
+  .shop-main {
+    padding: var(--gutter-mobile, 16px) !important;
   }
 }
 
@@ -1731,7 +1795,7 @@ div[style*="overflow-x: auto"] {
   .admin-main,
   .admin-body {
     margin-left: 0 !important;
-    padding: 12px !important;
+    padding: var(--gutter-mobile, 16px) !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
