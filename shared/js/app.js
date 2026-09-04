@@ -166,7 +166,7 @@ var App = (() => {
   }
 
   // Version tracking for prototype
-  const APP_VERSION = "158";
+  const APP_VERSION = "159";
   const VERSION_CHECK_URL = '/version.json';
   const VERSION_POLL_INTERVAL_MS = 15000;
   let updateBannerShown = false;
