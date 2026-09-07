@@ -3799,11 +3799,19 @@ body.screen-s01-s02-theme .s02-modal__header,
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full, 9999px);
-  background: var(--color-primary-container, #e0f2fe);
-  color: var(--color-primary);
+  background: var(--color-surface-container-high, #e8edf0);
+  border: 1px solid var(--color-outline-variant, #cbd5e1);
+  color: var(--color-primary, #0F4C5C);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+.s04-accordion-item.is-expanded .s04-accordion-header__badge {
+  background: var(--color-primary, #0F4C5C);
+  border-color: var(--color-primary, #0F4C5C);
+  color: var(--color-on-primary, #ffffff);
+  box-shadow: 0 2px 6px rgba(15, 76, 92, 0.25);
 }
 .s04-accordion-header__text {
   display: flex;
@@ -3880,26 +3888,352 @@ body.screen-s01-s02-theme .s02-modal__header,
   line-height: 1.6;
 }
 
-@media (max-width: 767px) {
+/* ============================================================
+   ShopReserve Design System Core Components (AGENTS.md & DESIGN.md)
+   ============================================================ */
+/* Button Hierarchy */
+.stitch-btn-primary {
+  background: var(--color-primary, #0F4C5C);
+  color: var(--color-on-primary, #FFFFFF);
+  border: 1px solid var(--color-primary, #0F4C5C);
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md, 8px);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.stitch-btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: 0 2px 8px rgba(15, 76, 92, 0.25);
+}
+.stitch-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.stitch-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.stitch-btn-secondary {
+  background: var(--color-surface, #FFFFFF);
+  color: var(--color-on-surface, #1F2937);
+  border: 1px solid var(--color-outline-variant, #D1D5DB);
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md, 8px);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.stitch-btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-container-low, #F1F5F9);
+  border-color: var(--color-outline, #6B7280);
+}
+.stitch-btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.stitch-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.stitch-btn-danger {
+  background: rgba(186, 26, 26, 0.08);
+  color: var(--color-error, #BA1A1A);
+  border: 1px solid rgba(186, 26, 26, 0.25);
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md, 8px);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.stitch-btn-danger:hover:not(:disabled) {
+  background: var(--color-error, #BA1A1A);
+  color: #FFFFFF;
+}
+.stitch-btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.stitch-btn-danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Status Badges */
+.stitch-badge--confirmed {
+  color: #16A34A;
+  background: #DCFCE7;
+  border: 1px solid #BBF7D0;
+  font-size: 12px;
+  line-height: 1.20;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.stitch-badge--pending {
+  color: #D97706;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  font-size: 12px;
+  line-height: 1.20;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.stitch-badge--cancelled {
+  color: #DC2626;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  font-size: 12px;
+  line-height: 1.20;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.stitch-badge--seated {
+  color: #0F4C5C;
+  background: #E0F2F1;
+  border: 1px solid #B2DFDB;
+  font-size: 12px;
+  line-height: 1.20;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.stitch-badge--completed {
+  color: #475569;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  font-size: 12px;
+  line-height: 1.20;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   S-04 Availability Multi-Viewport Responsive Matrix
+   Mobile (< 768px), Tablet (768px - 1023px), Desktop (>= 1024px)
+   ============================================================ */
+/* Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .s04-accordion-item {
+    border-radius: var(--radius-lg, 14px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
   .s04-accordion-header {
-    padding: 14px 14px;
+    padding: 16px 20px;
+  }
+  .s04-accordion-body {
+    padding: 20px 24px;
+  }
+  .availability-row {
+    padding: 14px 16px;
+    gap: 16px;
+  }
+}
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .s04-accordion-item {
+    border-radius: var(--radius-md, 12px);
+  }
+  .s04-accordion-header {
+    padding: 15px 18px;
+  }
+  .s04-accordion-body {
+    padding: 18px 20px;
+  }
+  .availability-row {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+  .availability-time-group {
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
+  .s04-accordion-item {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--color-outline-variant);
+  }
+  .s04-accordion-header {
+    padding: 14px 12px;
+    border-radius: 0;
   }
   .s04-accordion-body {
     padding: 14px 12px;
   }
   .s04-accordion-header__title {
-    font-size: 14px;
+    font-size: 15px;
   }
   .s04-accordion-header__desc {
-    font-size: 11px;
-  }
-  .availability-time-group {
-    width: 100%;
-    justify-content: flex-start;
+    font-size: 12px;
   }
   .availability-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    padding: 16px 0;
+    gap: 12px;
+    border-bottom: 1px solid var(--color-outline-variant);
+  }
+  .availability-row-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .availability-time-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .availability-time-group__inputs {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .availability-time-group__lo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .availability-time-group .form-input,
+  .availability-row input[type="time"] {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 15px !important;
+  }
+  .availability-row-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--color-outline-variant);
+  }
+  .availability-row-actions button {
+    min-height: 44px;
+  }
+  .s04-effective-card {
+    padding: 12px 14px;
+  }
+  .s04-protection-card {
+    padding: 12px 14px;
+  }
+  .s04-save-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .s04-save-bar .btn,
+  .s04-save-bar .stitch-btn-primary,
+  .s04-save-bar .stitch-btn-secondary {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   Ergonomic Focus Affordance & Sticky Save Docking
+   ============================================================ */
+/* High-contrast focus ring for tablets / floor lighting */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.form-input:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 1px !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.14) !important;
+}
+
+/* Base Save Bar */
+.s04-save-bar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg, 12px);
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+/* Sticky Save Bar on Mobile & Tablet (< 1024px) */
+@media (max-width: 1023px) {
+  .s04-save-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    border-radius: var(--radius-md, 8px) var(--radius-md, 8px) 0 0;
+    padding: 16px 20px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
   }
 }
 
